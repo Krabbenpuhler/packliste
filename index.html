@@ -215,7 +215,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.16';
+const K='packliste.v1';const VER='v0.17';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -500,12 +500,13 @@ async function fexp(){const t=T(),days=t.fp.days;if(!days.length)return ask('Es 
   ...days.map((d,i)=>[i+1,dm(d.d),f(+d.km||0),f(+d.hm||0),f(need(t,d).tot),f(dayK(d))].join(';'))];
  return dl('Essensplanung_'+slug(t.name)+'_'+VER+'.csv','\ufeff'+L.join('\r\n'))}
 $('#list').onchange=e=>{const el=e.target,t=T(),v=el.type=='checkbox'?(el.checked?1:0):el.type=='number'?(el.value===''?'':+el.value):el.value;
+ if(el.type=='date'&&v&&+String(v).slice(0,4)<1900)return;
  if(el.dataset.p){const[a,b]=el.dataset.p.split('.');b?S.prof[a][b]=v:S.prof[a]=v}
  else if(el.dataset.r)t.fp[el.dataset.r]=v;
  else if(el.dataset.pn){const sec=el.dataset.pn,k=el.dataset.k;if(sec=='notes')t.pn.notes=v;else if(el.dataset.rid){const r=plist(t,sec).find(x=>x.id==el.dataset.rid);if(r)r[k]=v}else t.pn[sec][k]=v}
  else if(el.dataset.did){const d=t.fp.days.find(x=>x.id==el.dataset.did);if(d){const[a,b]=el.dataset.k.split('.');b?d[a][b]=v:d[a]=v;if(a=='nach'){const nx=t.fp.days[t.fp.days.indexOf(d)+1];if(nx&&!nx.von){nx.von=v;save();return render()}}}}
  else return;
- const quiet=el.tagName=='TEXTAREA'||(el.tagName=='INPUT'&&!['number','date','checkbox'].includes(el.type));
+ const quiet=el.tagName=='TEXTAREA'||(el.tagName=='INPUT'&&!['number','checkbox'].includes(el.type));
  save();if(!quiet)render()};
 document.querySelectorAll('#sub button').forEach(b=>b.onclick=()=>{view=b.dataset.v;S.view=view;save();render()});
 const WC=['#17332E','#2F6B5A','#6FA287','#B7D3A8','#F2B705','#D98E04','#C4572F','#8C3B2A','#5A7FA8','#2E4E73','#8E6BA8','#9AA5A0','#5C706A','#C9A66B'];

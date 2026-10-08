@@ -1,6 +1,6 @@
 // Packliste Service Worker: Seite offline verfügbar halten.
 // Online wird immer die neueste Fassung geladen (Netz zuerst), offline die gespeicherte.
-const C = 'packliste-v0.16';
+const C = 'packliste-v0.17';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(C).then(c => c.addAll(FILES)));
