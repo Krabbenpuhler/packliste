@@ -99,7 +99,26 @@ header h1 small{font:400 .8rem system-ui;opacity:.7}
 #wdlg{width:min(640px,96vw);max-height:90vh;overflow:auto}
 .wpie{display:block;width:min(260px,70vw);margin:0 auto 8px}
 .sw{display:inline-block;width:.9em;height:.9em;border-radius:3px;margin-right:6px;vertical-align:-1px}
-#wb{display:flex;justify-content:flex-end;margin-top:12px}
+#wb{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+#vb{display:flex;justify-content:flex-end;margin-top:12px}
+#vdlg{width:min(640px,96vw);max-height:90vh;overflow:auto}
+.cmp td:first-child{white-space:normal}
+input::placeholder,textarea::placeholder{color:var(--mut);opacity:.55;font-style:italic}
+.vbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 12px;font-size:.9rem;color:var(--mut)}
+.vbar button{padding:.2em .7em}
+.vbar button.on{background:var(--sp);color:#fff;border-color:var(--sp)}
+.pg{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.pg:first-of-type{border-top:0}
+.pg label{font-size:.8rem;color:var(--mut)}
+.pg input,.pg select{width:100%;display:block;margin-top:2px}
+.pg .wide{grid-column:1/-1}
+.prow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 12px;border-top:1px solid var(--line)}
+.prow input:not([type=checkbox]){min-width:0}
+.prow .z{flex:0 0 7em}
+.prow .f{flex:1 1 9em}
+.prow a.mini{text-decoration:none;font-size:1.1rem}
+.cat h2 small input{font-size:.85rem;padding:.15em .4em}
+textarea{font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:.45em .6em;width:100%;min-height:7em;resize:vertical}
 footer{cursor:pointer}
 .ck{display:block;padding:4px 0}
 .pks{padding:.15em .3em;font-size:.8rem}
@@ -146,11 +165,11 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <header><div class="top"><h1>Packliste <small id="ver"></small></h1><div class="nv"><nav><button data-p="gear">Ausrüstung</button><button data-p="tour">Touren</button></nav><button id="sync" class="syn off" type="button">☁ Sync einrichten</button><button id="undo" title="Letzte Änderung rückgängig machen" disabled>Zurück</button></div></div>
 <div class="tr" id="trbar"><select id="tour" aria-label="Tour"></select>
 <button id="new">Neue Tour</button><button id="dup">Kopieren</button><button id="ren">Umbenennen</button><button id="del">Löschen</button></div></header>
-<div class="sub" id="sub"><button data-v="pack">Packliste</button><button data-v="food">Essensplanung</button><button data-v="exp">Ausgaben</button></div>
+<div class="sub" id="sub"><button data-v="plan">Planung</button><button data-v="pack">Packliste</button><button data-v="food">Essensplanung</button><button data-v="exp">Ausgaben</button></div>
 <div class="bar" id="bar"><input id="q" type="search" placeholder="Suchen" aria-label="Suchen">
 <select id="so" aria-label="Sortierung"><option value="cat">Nach Kategorie</option><option value="name">Nach Name</option><option value="gd">Schwerste zuerst</option><option value="ga">Leichteste zuerst</option></select>
 <label><input type="checkbox" id="on">Nur ausgewählte</label>
-<span id="lgd" class="lg"><i class="lb"></i>am Körper<i class="lp"></i>Rucksack</span><button id="add">Gegenstand hinzufügen</button><button id="addc">Kategorie hinzufügen</button><button id="prt">Checkliste drucken</button></div>
+<span id="lgd" class="lg"><i class="lb"></i>am Körper<i class="lp"></i>Rucksack</span><button id="add">Gegenstand hinzufügen</button><button id="addc">Kategorie hinzufügen</button><button id="prt">Checkliste drucken</button><button id="wex">Gewichte exportieren</button></div>
 <main id="list"></main>
 <details class="data"><summary>Datensicherung</summary>
 <button id="sopen">Synchronisation</button><button id="exp">Sicherung speichern</button><input id="imp" type="file" accept=".json" aria-label="Sicherung laden"></details>
@@ -160,12 +179,13 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <dialog id="md"><form method="dialog"><p id="mt"></p><input id="mi"><div id="mb"><button value="ok">OK</button><button value="cancel">Abbrechen</button></div></form></dialog>
 <dialog id="sdlg"><h3>Synchronisation</h3>
 <p class="hint" style="padding:0 0 8px">Deine Daten werden in deinem privaten GitHub-Repository gespeichert. Ohne Netz arbeitest du normal weiter, Änderungen werden später automatisch hochgeladen.</p>
-<label>Repository (benutzername/repository)<input id="srepo" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="benutzername/packliste-daten"></label>
+<label>Repository (benutzername/repository)<input id="srepo" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="z. B. benutzername/packliste-daten"></label>
 <label>Token<input id="stok" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_..."></label>
 <label>Datei<input id="spath" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
 <p id="smsg" class="hint" style="padding:4px 0 0"></p>
 <div id="sbt"><button type="button" data-s="save">Speichern und verbinden</button><button type="button" data-s="now">Jetzt synchronisieren</button><button type="button" data-s="off">Trennen</button><button type="button" class="ghost" data-s="x">Schließen</button></div></dialog>
-<dialog id="wdlg"><h3>Gewichtsübersicht</h3><div id="wbody"></div><div id="wb"><button type="button">Schließen</button></div></dialog>
+<dialog id="wdlg"><h3>Gewichtsübersicht</h3><div id="wbody"></div><div id="wb"><button type="button" data-wb="csv">Export (CSV)</button><button type="button" data-wb="x">Schließen</button></div></dialog>
+<dialog id="vdlg"><h3>Varianten vergleichen</h3><div id="vbody"></div><div id="vb"><button type="button">Schließen</button></div></dialog>
 <dialog id="fdlg"><h3 id="ftit"></h3>
 <label id="fart">Art<select id="fsa"><option value="f">Lebensmittel</option><option value="m">Gericht</option></select></label>
 <label>Name<input id="fdn" list="fdl"></label><datalist id="fdl"></datalist>
@@ -190,15 +210,16 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <label>Zusatzgewicht bei voll in g (optional)<input id="ff" type="number" min="0" inputmode="numeric"></label>
 <label>Inhalt<select id="ft"><option value="v">Verbrauchsmaterial</option><option value="w">Wasser</option></select></label>
 <label>Anzahl vorhanden<input id="fq" type="number" min="1" inputmode="numeric"></label>
+<label>Kaufpreis je Stück in € (optional)<input id="fpz" type="number" min="0" step="0.01" inputmode="decimal"></label>
 <datalist id="cl"></datalist><datalist id="sl"></datalist>
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.15';
+const K='packliste.v1';const VER='v0.16';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
- S.tours.forEach(t=>{t.of=t.of||{};t.em=t.em||{};t.qt=t.qt||{};t.ax=t.ax||[];t.cur=t.cur||'€';t.fp=t.fp||{days:[]};t.ov=t.ov||{};t.pl=t.pl||{};t.ex=t.ex||[]});
+ S.tours.forEach(t=>{t.pn=t.pn||{};t.pn.an=t.pn.an||{d:'',rows:[]};t.pn.ab=t.pn.ab||{d:'',rows:[]};t.pn.links=t.pn.links||[];t.pn.todo=t.pn.todo||[];t.pn.notes=t.pn.notes||'';t.of=t.of||{};t.em=t.em||{};t.qt=t.qt||{};t.ax=t.ax||[];t.cur=t.cur||'€';t.fp=t.fp||{days:[]};t.ov=t.ov||{};t.pl=t.pl||{};t.ex=t.ex||[]});
  for(const p of D.patch){const it=S.items.find(i=>i.id==p.id);if(it&&it.f===undefined){if(it.g==p.og)it.g=p.g;it.f=p.f;it.t=p.t}}
  S.seeded=S.seeded||[];S.cats=S.cats||[];S.foods=S.foods||[];S.meals=S.meals||[];S.prof=S.prof||{h:190,w:81,age:'',sex:'m',pal:1.3};S.prof.sh=S.prof.sh||{b:25,l:15,d:35,s:25};
  {const gid=()=>'x'+Math.random().toString(36).slice(2,9);
@@ -235,14 +256,14 @@ let q='',sort='cat',only=false,closed=new Set(),ed=null,page=S.page||'gear',view
 function render(){
  const t=cur(),G=page=='gear',items=all(t),E=!G&&view!='pack';
  $('#sub').hidden=G;$('#bar').hidden=E;document.querySelectorAll('#sub button').forEach(b=>b.setAttribute('aria-current',b.dataset.v==view?'page':'false'));
- $('#trbar').hidden=G;$('#tot').hidden=G;$('#addc').hidden=!G;$('#lgd').hidden=G;$('#on').parentElement.hidden=G;$('#prt').hidden=G;
+ $('#trbar').hidden=G;$('#tot').hidden=G;$('#addc').hidden=!G;$('#lgd').hidden=G;$('#on').parentElement.hidden=G;$('#prt').hidden=G;$('#wex').hidden=G;
  document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-current',b.dataset.p==page?'page':'false'));
  $('#tour').innerHTML=S.tours.map(x=>`<option value="${x.id}"${x.id==t.id?' selected':''}>${esc(x.name)}</option>`).join('');
- if(E){$('#tot').hidden=true;$('#list').innerHTML=view=='food'?foodHtml(t):expHtml(t);return}
+ if(E){$('#tot').hidden=true;$('#list').innerHTML=view=='food'?foodHtml(t):view=='plan'?planHtml(t):expHtml(t);return}
  const list=items.filter(i=>(G||!only||t.sel[i.id])&&(!q||(i.n+i.c+i.s).toLowerCase().includes(q)));
  const cmp={cat:null,name:(a,b)=>a.n.localeCompare(b.n,'de'),gd:(a,b)=>X(t,b)-X(t,a),ga:(a,b)=>X(t,a)-X(t,b)}[sort];
- const row=i=>{const on=G||t.sel[i.id];return `<li class="row${on?' on':''}${on&&!G?(P(t,i)=='b'?' pb':' pp'):''}" data-id="${i.id}"><label${G?' data-a="edit"':''}>${G?'':`<input type="checkbox" data-a="sel"${on?' checked':''}>`}<span>${esc(i.n)}${G&&(i.q||1)>1?`<em class="tag">× ${i.q}</em>`:''}${i.x?'<em class="tag">nur Tour</em>':''}${i.k?`<small>${esc(i.k)}</small>`:''}${F(t,i)?(on&&!G?`<small><button class="fl${i.id in t.of?' mod':''}" data-a="fl">${t.em[i.id]?'leer':'voll'}: + ${F(t,i)} g ${i.t=='w'?'Wasser':'Verbrauch'}</button></small>`:`<small>+ ${F(t,i)} g bei voll</small>`):''}</span></label>${on&&!G&&(i.q||1)>1?`<span class="qt"><button data-a="qm" aria-label="weniger">−</button><b>${N(t,i)}</b><button data-a="qp" aria-label="mehr">+</button></span>`:''}${on&&!G?`<button class="pl ${P(t,i)}" data-a="pl" title="Wechseln zwischen am Körper und im Rucksack">${P(t,i)=='b'?'am Körper':'Rucksack'}</button>`:''}<button class="w${i.id in t.ov?' mod':''}" data-a="edit" title="Bearbeiten">${W(t,i)*N(t,i)} g${N(t,i)>1&&on&&!G?`<small>je ${W(t,i)} g</small>`:''}</button></li>`};
- let h='';
+ const row=i=>{const on=G||t.sel[i.id];return `<li class="row${on?' on':''}${on&&!G?(P(t,i)=='b'?' pb':' pp'):''}" data-id="${i.id}"><label${G?' data-a="edit"':''}>${G?'':`<input type="checkbox" data-a="sel"${on?' checked':''}>`}<span>${esc(i.n)}${G&&i.pr?`<small>Kaufpreis ${nf(i.pr)} €${(i.q||1)>1?' je Stück':''}</small>`:''}${G&&(i.q||1)>1?`<em class="tag">× ${i.q}</em>`:''}${i.x?'<em class="tag">nur Tour</em>':''}${i.k?`<small>${esc(i.k)}</small>`:''}${F(t,i)?(on&&!G?`<small><button class="fl${i.id in t.of?' mod':''}" data-a="fl">${t.em[i.id]?'leer':'voll'}: + ${F(t,i)} g ${i.t=='w'?'Wasser':'Verbrauch'}</button></small>`:`<small>+ ${F(t,i)} g bei voll</small>`):''}</span></label>${on&&!G&&(i.q||1)>1?`<span class="qt"><button data-a="qm" aria-label="weniger">−</button><b>${N(t,i)}</b><button data-a="qp" aria-label="mehr">+</button></span>`:''}${on&&!G?`<button class="pl ${P(t,i)}" data-a="pl" title="Wechseln zwischen am Körper und im Rucksack">${P(t,i)=='b'?'am Körper':'Rucksack'}</button>`:''}<button class="w${i.id in t.ov?' mod':''}" data-a="edit" title="Bearbeiten">${W(t,i)*N(t,i)} g${N(t,i)>1&&on&&!G?`<small>je ${W(t,i)} g</small>`:''}</button></li>`};
+ let h=G?'':vbarHtml(t);
  for(const c of [...new Set(items.map(i=>i.c).concat(G?S.cats.map(x=>x.c):[]))]){
   let ci=list.filter(i=>i.c==c);if(!ci.length&&!(G&&!q))continue;
   if(cmp)ci=ci.slice().sort(cmp);
@@ -256,7 +277,7 @@ function render(){
  const fd=G?0:(t.food||0);let bs=0,vb=0,wa=0,bd=0,n=0;
  for(const i of items)if(t.sel[i.id]){const k=N(t,i);n+=k;const f=(t.em[i.id]?0:F(t,i))*k,w=W(t,i)*k;if(P(t,i)=='b')bd+=w+f;else{bs+=w;if(i.t=='w')wa+=f;else vb+=f}}
  $('#tot').innerHTML=G?'':`<div class="fr"><div><b>${fmt(bs)}</b><span>Basis</span></div><div><b>${fmt(vb)}</b><span>+ Verbrauch</span></div><div><b>${fmt(wa)}</b><span>+ Wasser</span></div><button class="fd" data-a="food" title="Essen eintragen"><b>${fmt(fd)}</b><span>+ Essen</span></button><div class="sm"><b>${fmt(bs+vb+wa+fd)}</b><span>= Rucksack</span></div></div><div class="fn">Am Körper ${fmt(bd)}, ${n} Teile gewählt, tippe für Details</div>`;
- if(!G){let r=`<h1>${esc(t.name)}</h1><p>Basis ${fmt(bs)}, Verbrauch ${fmt(vb)}, Wasser ${fmt(wa)}, Essen ${fmt(fd)}, Rucksack gesamt ${fmt(bs+vb+wa+fd)}, am Körper ${fmt(bd)}</p>`;
+ if(!G){let r=`<h1>${esc(t.name+vName(t))}</h1><p>Basis ${fmt(bs)}, Verbrauch ${fmt(vb)}, Wasser ${fmt(wa)}, Essen ${fmt(fd)}, Rucksack gesamt ${fmt(bs+vb+wa+fd)}, am Körper ${fmt(bd)}</p>`;
  for(const c of [...new Set(items.map(i=>i.c))]){
   const ci=items.filter(i=>i.c==c&&t.sel[i.id]);if(!ci.length)continue;
   r+=`<section><h2>${esc(c)}</h2><ul>`;let s=null;
@@ -269,7 +290,7 @@ function render(){
 function dlg(id,pre){
  const t=cur(),it=id?all(t).find(i=>i.id==id):null;ed=it;
  $('#dt').textContent=it?'Gegenstand bearbeiten':'Neuer Gegenstand';
- $('#fn').value=it?it.n:'';$('#fc').value=it?it.c:'';$('#fs').value=it?it.s:'';$('#fg').value=it?W(t,it):'';$('#ff').value=it?(F(t,it)||''):'';$('#ft').value=(it&&it.t)||'v';$('#fq').value=it?(it.q||1):1;
+ $('#fn').value=it?it.n:'';$('#fc').value=it?it.c:'';$('#fs').value=it?it.s:'';$('#fg').value=it?W(t,it):'';$('#ff').value=it?(F(t,it)||''):'';$('#ft').value=(it&&it.t)||'v';$('#fq').value=it?(it.q||1):1;$('#fpz').value=it&&it.pr?it.pr:'';
  const u=k=>[...new Set(all(t).map(i=>i[k]).concat(S.cats.map(x=>x[k])).filter(Boolean))].map(v=>`<option value="${esc(v)}">`).join('');
  $('#cl').innerHTML=u('c');$('#sl').innerHTML=u('s');
  const b=page=='gear'?(it?[['saveG','Speichern'],['delG','Löschen']]:[['addG','Speichern']])
@@ -282,7 +303,7 @@ function dlg(id,pre){
 $('#acts').onclick=async e=>{
  const a=e.target.dataset.d;if(!a)return;
  if(a=='x')return $('#dlg').close();
- const t=cur(),id=ed&&ed.id,v={n:$('#fn').value.trim(),c:$('#fc').value.trim()||'Sonstiges',s:$('#fs').value.trim(),g:Math.max(0,Math.round(+$('#fg').value||0)),f:Math.max(0,Math.round(+$('#ff').value||0)),t:$('#ft').value,q:Math.max(1,Math.round(+$('#fq').value||1))};
+ const t=cur(),id=ed&&ed.id,v={n:$('#fn').value.trim(),c:$('#fc').value.trim()||'Sonstiges',s:$('#fs').value.trim(),g:Math.max(0,Math.round(+$('#fg').value||0)),f:Math.max(0,Math.round(+$('#ff').value||0)),t:$('#ft').value,q:Math.max(1,Math.round(+$('#fq').value||1)),pr:Math.max(0,Math.round((+$('#fpz').value||0)*100)/100)};
  if(!['delG','delX','rst'].includes(a)&&!v.n)return $('#fn').focus();
  if(a=='addT'){const x={id:uid(),...v};t.ex.push(x);t.sel[x.id]=1}
  else if(a=='addG'){const x={id:uid(),...v,b:0};S.items.push(x);t.sel[x.id]=1}
@@ -326,6 +347,13 @@ $('#list').onclick=e=>{
  else if(a=='fx')return fexp();
  else if(a=='cu')return xcur();
  else if(a=='edit')return dlg(id);
+ else if(a=='vs')vSwitch(t,el.dataset.vid);
+ else if(a=='vn')return vNew(t);
+ else if(a=='vr')return vRen(t);
+ else if(a=='vd')return vDel(t);
+ else if(a=='vc')return vcmp();
+ else if(a=='pra')plist(t,el.dataset.sec).push({id:uid()});
+ else if(a=='prd'){const L=plist(t,el.dataset.sec),k=L.findIndex(x=>x.id==el.dataset.rid);if(k>=0)L.splice(k,1)}
  save();render();
 };
 $('#q').oninput=e=>{q=e.target.value.trim().toLowerCase();render()};
@@ -454,7 +482,7 @@ $('#cbt').onclick=e=>{const a=e.target.dataset.c;if(!a)return;if(a=='all'){docum
  $('#cdlg').close();save();render()};
 async function frange(){const t=T(),fp=t.fp;if(!fp.from||!fp.to||fp.to<fp.from)return ask('Bitte Von und Bis angeben, Bis nicht vor Von.');
  const ds=[];for(const d=new Date(fp.from+'T00:00:00');;d.setDate(d.getDate()+1)){const s=ymd(d);if(s>fp.to)break;ds.push(s);if(ds.length>60)return ask('Maximal 60 Tage.')}
- const drop=fp.days.filter(x=>!ds.includes(x.d)&&(x.km||x.hm||SLOTS.some(([s])=>x.m[s].length)));
+ const drop=fp.days.filter(x=>!ds.includes(x.d)&&(x.km||x.hm||x.von||x.nach||x.ds||x.ue||SLOTS.some(([s])=>x.m[s].length)));
  if(drop.length&&!(await ask(drop.length+' Tag(e) mit Eingaben liegen außerhalb des Zeitraums und werden entfernt. Fortfahren?')))return;
  fp.days=ds.map(s=>fp.days.find(x=>x.d==s)||{id:uid(),d:s,km:'',hm:'',u:'p',z:0,sp:{b:'start',l:'start',d:'start',s:'start'},x:{},m:{b:[],l:[],d:[],s:[]}});save();render()}
 async function fweight(){const t=T(),g=Math.round(t.fp.days.reduce((a,d)=>a+pkG(d,'start'),0));if(!g)return ask('Für Mahlzeiten mit „Rucksack“ sind noch keine Lebensmittel geplant.');if(await ask(`Essensgewicht ${nfi(g)} g (nur Mahlzeiten mit „Rucksack“) als Essen in die Packliste übernehmen?`)){t.food=g;save();render()}}
@@ -471,11 +499,14 @@ async function fexp(){const t=T(),days=t.fp.days;if(!days.length)return ask('Es 
   ...days.flatMap((d,i)=>SLOTS.flatMap(([s,l])=>[...(d.x[s]!==undefined?[[i+1,dm(d.d),PKL[d.sp[s]],l,'extern','','','',f(d.x[s])].join(';')]:[]),...d.m[s].flatMap(res).map(x=>[i+1,dm(d.d),PKL[d.sp[s]],l,q(x.f.n),f(x.q),u(x),f(xg(x)),f(xk(x))].join(';'))])),'','Bedarf pro Tag','Tag;Datum;km;hm;Bedarf kcal;Gedeckt kcal',
   ...days.map((d,i)=>[i+1,dm(d.d),f(+d.km||0),f(+d.hm||0),f(need(t,d).tot),f(dayK(d))].join(';'))];
  return dl('Essensplanung_'+slug(t.name)+'_'+VER+'.csv','\ufeff'+L.join('\r\n'))}
-$('#list').onchange=e=>{const el=e.target,t=T(),v=el.type=='number'?(el.value===''?'':+el.value):el.value;
+$('#list').onchange=e=>{const el=e.target,t=T(),v=el.type=='checkbox'?(el.checked?1:0):el.type=='number'?(el.value===''?'':+el.value):el.value;
  if(el.dataset.p){const[a,b]=el.dataset.p.split('.');b?S.prof[a][b]=v:S.prof[a]=v}
  else if(el.dataset.r)t.fp[el.dataset.r]=v;
- else if(el.dataset.did){const d=t.fp.days.find(x=>x.id==el.dataset.did);if(d){const[a,b]=el.dataset.k.split('.');b?d[a][b]=v:d[a]=v}}
- else return;save();render()};
+ else if(el.dataset.pn){const sec=el.dataset.pn,k=el.dataset.k;if(sec=='notes')t.pn.notes=v;else if(el.dataset.rid){const r=plist(t,sec).find(x=>x.id==el.dataset.rid);if(r)r[k]=v}else t.pn[sec][k]=v}
+ else if(el.dataset.did){const d=t.fp.days.find(x=>x.id==el.dataset.did);if(d){const[a,b]=el.dataset.k.split('.');b?d[a][b]=v:d[a]=v;if(a=='nach'){const nx=t.fp.days[t.fp.days.indexOf(d)+1];if(nx&&!nx.von){nx.von=v;save();return render()}}}}
+ else return;
+ const quiet=el.tagName=='TEXTAREA'||(el.tagName=='INPUT'&&!['number','date','checkbox'].includes(el.type));
+ save();if(!quiet)render()};
 document.querySelectorAll('#sub button').forEach(b=>b.onclick=()=>{view=b.dataset.v;S.view=view;save();render()});
 const WC=['#17332E','#2F6B5A','#6FA287','#B7D3A8','#F2B705','#D98E04','#C4572F','#8C3B2A','#5A7FA8','#2E4E73','#8E6BA8','#9AA5A0','#5C706A','#C9A66B'];
 let wOff=new Set(['b']);
@@ -492,10 +523,64 @@ function wrender(){const t=T(),sg=wsegs(t),on=sg.filter(s=>!wOff.has(s.id)),sum=
  $('#wbody').innerHTML=`<svg class="wpie" viewBox="0 0 200 200" role="img" aria-label="Tortendiagramm der Gewichte">${pie}</svg><table class="xt"><tbody>${sg.map((s,i)=>{const o=!wOff.has(s.id);return`<tr><td><label class="ck"><input type="checkbox" data-w="${esc(s.id)}"${o?' checked':''}><span class="sw" style="background:${WC[i%WC.length]}"></span>${esc(s.n)}</label></td><td>${fmt(s.g)}</td><td>${o&&sum?Math.round(s.g/sum*100)+' %':'–'}</td></tr>`}).join('')}</tbody><tfoot><tr><td>Summe der gewählten</td><td>${fmt(sum)}</td><td></td></tr></tfoot></table>`}
 function wopen(){wrender();$('#wdlg').showModal()}
 $('#wbody').onchange=e=>{const id=e.target.dataset.w;if(!id)return;wOff.has(id)?wOff.delete(id):wOff.add(id);wrender()};
-$('#wb').onclick=()=>$('#wdlg').close();
+$('#wb').onclick=e=>{const a=e.target.dataset.wb;if(a=='csv')wexp();else if(a=='x')$('#wdlg').close()};
 $('#ver').textContent=VER;$('#undo').onclick=undo;ubt();
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key=='z'&&!/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)){e.preventDefault();undo()}});
 $('#addc').onclick=async()=>{const n=await ask('Name der neuen Kategorie?','');if(n){S.cats.push({c:n,s:''});save();render()}};
+// ===== Varianten =====
+const VF=['sel','pl','qt','ov','of','em','food'];
+const cl=x=>JSON.parse(JSON.stringify(x??null));
+function vInit(t){if(!t.vr||!t.vr.length){t.vr=[{id:'v1',n:'V1'}];t.va='v1'}}
+function vStore(t){const c=t.vr.find(v=>v.id==t.va);if(c)for(const f of VF)c[f]=cl(t[f])}
+function vLoad(t,id){const n=t.vr.find(v=>v.id==id);if(!n)return;for(const f of VF){t[f]=n[f]!==undefined&&n[f]!==null?cl(n[f]):(f=='food'?0:{});delete n[f]}t.va=id}
+const vName=t=>t.vr&&t.vr.length>1?' ('+((t.vr.find(v=>v.id==t.va)||{}).n||'')+')':'';
+function vbarHtml(t){const vr=t.vr&&t.vr.length?t.vr:[{id:'v1',n:'V1'}],act=t.va||'v1';
+ return`<div class="vbar">Variante:${vr.map(v=>`<button data-a="vs" data-vid="${v.id}" class="${v.id==act?'on':''}">${esc(v.n)}</button>`).join('')}<button class="mini" data-a="vn" title="Neue Variante als Kopie der aktuellen">+ Variante</button>${vr.length>1?`<button class="mini" data-a="vc">Vergleichen</button><button class="mini" data-a="vr">Umbenennen</button><button class="mini" data-a="vd">Löschen</button>`:''}</div>`}
+function vSwitch(t,id){vInit(t);if(id==t.va)return;vStore(t);vLoad(t,id)}
+async function vNew(t){vInit(t);const n=await ask('Name der neuen Variante? Sie startet als Kopie der aktuellen.','V'+(t.vr.length+1));if(!n)return;vStore(t);const id=uid();t.vr.push({id,n});t.va=id;save();render()}
+async function vRen(t){vInit(t);const c=t.vr.find(v=>v.id==t.va),n=await ask('Neuer Name der Variante?',c.n);if(n){c.n=n;save();render()}}
+async function vDel(t){vInit(t);if(t.vr.length<2)return;const c=t.vr.find(v=>v.id==t.va);if(!(await ask(`Variante „${c.n}“ löschen?`)))return;const o=t.vr.find(v=>v.id!=t.va);vLoad(t,o.id);t.vr=t.vr.filter(v=>v.id!=c.id);save();render()}
+function vstate(t,v){if(v.id==(t.va||'v1'))return t;const o={...t};for(const f of VF)o[f]=v[f]!==undefined&&v[f]!==null?v[f]:(f=='food'?0:{});return o}
+function totals(t){let bs=0,vb=0,wa=0,bd=0,n=0;for(const i of all(t))if(t.sel[i.id]){const k=N(t,i);n+=k;const f=(t.em[i.id]?0:F(t,i))*k,w=W(t,i)*k;if(P(t,i)=='b')bd+=w+f;else{bs+=w;if(i.t=='w')wa+=f;else vb+=f}}const fd=t.food||0;return{bs,vb,wa,fd,rs:bs+vb+wa+fd,bd,n}}
+function vcmp(){const t=T();vInit(t);const S2=t.vr.map(v=>({v,s:vstate(t,v)})),tt=S2.map(x=>totals(x.s));
+ const rows=[['Basis','bs'],['+ Verbrauch','vb'],['+ Wasser','wa'],['+ Essen','fd'],['= Rucksack','rs'],['Am Körper','bd'],['Teile','n']];
+ const items=all(t).filter(i=>{const ws=S2.map(x=>x.s.sel[i.id]?N(x.s,i)+':'+W(x.s,i):'');return ws.some(Boolean)&&new Set(ws).size>1});
+ let h=`<div class="xw"><table class="xt cmp"><thead><tr><th></th>${S2.map(x=>`<th>${esc(x.v.n)}</th>`).join('')}</tr></thead><tbody>${rows.map(([l,k])=>`<tr><td>${l}</td>${tt.map(o=>`<td>${k=='n'?o.n:fmt(o[k])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+ h+=items.length?`<h3 style="margin:16px 0 4px;font-size:1rem">Unterschiede</h3><div class="xw"><table class="xt cmp"><thead><tr><th>Gegenstand</th>${S2.map(x=>`<th>${esc(x.v.n)}</th>`).join('')}</tr></thead><tbody>${items.map(i=>`<tr><td>${esc(i.n)}</td>${S2.map(x=>`<td>${x.s.sel[i.id]?(N(x.s,i)>1?N(x.s,i)+'× ':'')+fmt(W(x.s,i)*N(x.s,i)):'–'}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`:'<p class="hint" style="padding:10px 0 0">Die Varianten enthalten dieselben Gegenstände.</p>';
+ $('#vbody').innerHTML=h;$('#vdlg').showModal()}
+$('#vb').onclick=()=>$('#vdlg').close();
+// ===== Gewichte exportieren =====
+async function wexp(){const t=T(),o=totals(t),g=v=>String(Math.round(v)),q=s=>'"'+String(s??'').replace(/"/g,'""')+'"',eur=v=>v?v.toFixed(2).replace('.',','):'';
+ const sel=all(t).filter(i=>t.sel[i.id]),cats=[...new Set(sel.map(i=>i.c))];
+ const L=['Tour;'+q(t.name+vName(t)),'','Übersicht;Gramm','Basis;'+g(o.bs),'Verbrauch;'+g(o.vb),'Wasser;'+g(o.wa),'Essen;'+g(o.fd),'Rucksack gesamt;'+g(o.rs),'Am Körper;'+g(o.bd),'Gesamt (Rucksack + Körper);'+g(o.rs+o.bd),'Teile;'+o.n,'',
+  'Nach Kategorie','Kategorie;Am Körper g;Rucksack g;Verbrauch g;Wasser g;Gesamt g'];
+ const cs=c=>{let b=0,p=0,v=0,w=0;for(const i of sel.filter(i=>i.c==c)){const k=N(t,i),e=W(t,i)*k,f=(t.em[i.id]?0:F(t,i))*k;if(P(t,i)=='b')b+=e+f;else{p+=e;i.t=='w'?w+=f:v+=f}}return{b,p,v,w,s:b+p+v+w}};
+ for(const c of cats){const x=cs(c);L.push([q(c),g(x.b),g(x.p),g(x.v),g(x.w),g(x.s)].join(';'))}
+ L.push('','Einzelne Gegenstände','Kategorie;Unterkategorie;Gegenstand;Anzahl;Gewicht je Stück g;Gewicht gesamt g;Zusatz voll g;Ort;Kaufpreis je Stück €');
+ for(const c of cats)for(const i of sel.filter(i=>i.c==c)){const k=N(t,i);L.push([q(c),q(i.s),q(i.n),k,g(W(t,i)),g(W(t,i)*k),g((t.em[i.id]?0:F(t,i))*k),P(t,i)=='b'?'Am Körper':'Rucksack',eur(i.pr)].join(';'))}
+ return dl('Gewichte_'+slug(t.name+vName(t))+'_'+VER+'.csv','﻿'+L.join('\r\n'))}
+$('#wex').onclick=wexp;
+// ===== Planung =====
+const UE=['','Zelt','Hotel','Pension','Hütte / Bothy','Campingplatz','Hostel','Sonstiges'];
+const href=u=>{u=(u||'').trim();return /^https?:\/\//i.test(u)?u:'https://'+u};
+const plist=(t,sec)=>sec=='an'||sec=='ab'?t.pn[sec].rows:t.pn[sec];
+function planHtml(t){const fp=t.fp,days=fp.days,pn=t.pn;
+ const km=days.reduce((a,d)=>a+(+d.km||0),0),hm=days.reduce((a,d)=>a+(+d.hm||0),0),ueC={};days.forEach(d=>{if(d.ue)ueC[d.ue]=(ueC[d.ue]||0)+1});
+ const lk=u=>u?`<a class="mini" href="${esc(href(u))}" target="_blank" rel="noopener" aria-label="Link öffnen" title="Link öffnen">↗</a>`:'';
+ const del=(sec,r,l)=>`<button class="mini" data-a="prd" data-sec="${sec}" data-rid="${r.id}" aria-label="${l} löschen" title="Löschen">✕</button>`;
+ const add=(sec,l)=>`<div class="fg"><div><button data-a="pra" data-sec="${sec}">${l}</button></div></div>`;
+ let h=`<section class="cat"><h2>Zeitraum</h2><div class="fg"><label>Von<input type="date" data-r="from" value="${fp.from||''}"></label><label>Bis<input type="date" data-r="to" value="${fp.to||''}"></label><div><button data-a="fr">Tage anlegen</button></div></div><p class="hint">Gilt auch für die Essensplanung. Strecke und Höhenmeter trägst du nur einmal ein.</p></section>`;
+ if(days.length)h+=`<div class="xs"><div><b>${days.length}</b><span>Tage</span></div><div><b>${nfi(km)} km</b><span>Strecke</span></div><div><b>${nfi(hm)} hm</b><span>Aufstieg</span></div>${Object.entries(ueC).map(([k,n])=>`<div><b>${n}×</b><span>${esc(k)}</span></div>`).join('')}</div>`;
+ for(const[k,l]of[['an','Anreise'],['ab','Abreise']]){const s=pn[k];
+  h+=`<section class="cat"><h2>${l}<small><input type="date" data-pn="${k}" data-k="d" value="${s.d||''}" aria-label="${l}: Datum"></small></h2>${s.rows.map(r=>`<div class="prow"><input class="z" data-pn="${k}" data-rid="${r.id}" data-k="z" value="${esc(r.z||'')}" placeholder="Zeit" aria-label="Zeit"><input class="f" data-pn="${k}" data-rid="${r.id}" data-k="w" value="${esc(r.w||'')}" placeholder="Was, z. B. Flug Hamburg → Lissabon" aria-label="Was"><input class="f" data-pn="${k}" data-rid="${r.id}" data-k="v" value="${esc(r.v||'')}" placeholder="Wie, z. B. TAP, Flixbus" aria-label="Verkehrsmittel">${del(k,r,'Zeile')}</div>`).join('')}${add(k,'+ Zeile')}</section>`}
+ if(days.length)h+=`<section class="cat"><h2>Etappen</h2>${days.map((d,i)=>`<div class="pg"><div class="wide"><b>Tag ${i+1}, ${fd(d.d)}</b></div><label>Von<input data-did="${d.id}" data-k="von" value="${esc(d.von||'')}"></label><label>Nach<input data-did="${d.id}" data-k="nach" value="${esc(d.nach||'')}"></label><label>Strecke (km)<input type="number" step="any" inputmode="decimal" data-did="${d.id}" data-k="km" value="${d.km??''}"></label><label>Aufstieg (hm)<input type="number" step="any" inputmode="decimal" data-did="${d.id}" data-k="hm" value="${d.hm??''}"></label><label>Übernachtung<select data-did="${d.id}" data-k="ue">${UE.map(o=>`<option value="${o}"${(d.ue||'')==o?' selected':''}>${o||'–'}</option>`).join('')}</select></label><label class="wide">Beschreibung<input data-did="${d.id}" data-k="ds" value="${esc(d.ds||'')}" placeholder="z. B. Anreise, Ruhetag, Resupply"></label></div>`).join('')}</section>`;
+ else h+='<p>Lege oben einen Zeitraum an, dann entstehen die Tage für die Etappen.</p>';
+ h+=`<section class="cat"><h2>Links</h2>${pn.links.map(r=>`<div class="prow"><input class="f" data-pn="links" data-rid="${r.id}" data-k="n" value="${esc(r.n||'')}" placeholder="Titel (optional)" aria-label="Titel"><input class="f" type="url" data-pn="links" data-rid="${r.id}" data-k="u" value="${esc(r.u||'')}" placeholder="https://…" aria-label="Adresse">${lk(r.u)}${del('links',r,'Link')}</div>`).join('')}${add('links','+ Link')}</section>`;
+ const op=pn.todo.filter(x=>!x.x).length;
+ h+=`<section class="cat"><h2>To-dos<small>${op} offen</small></h2>${pn.todo.map(r=>`<div class="prow"><input type="checkbox" data-pn="todo" data-rid="${r.id}" data-k="x"${r.x?' checked':''} aria-label="Erledigt"><input class="f" data-pn="todo" data-rid="${r.id}" data-k="t" value="${esc(r.t||'')}" placeholder="Aufgabe" aria-label="Aufgabe"${r.x?' style="text-decoration:line-through;opacity:.6"':''}><input class="f" type="url" data-pn="todo" data-rid="${r.id}" data-k="u" value="${esc(r.u||'')}" placeholder="Link (optional)" aria-label="Link">${lk(r.u)}${del('todo',r,'Aufgabe')}</div>`).join('')}${add('todo','+ Aufgabe')}</section>`;
+ h+=`<section class="cat"><h2>Notizen</h2><div style="padding:10px 12px"><textarea data-pn="notes" aria-label="Notizen" placeholder="Alles Weitere zur Tour">${esc(pn.notes||'')}</textarea></div></section>`;
+ return h}
+function rsafe(){const a=document.activeElement,l=$('#list');if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&l&&l.contains&&l.contains(a)){clearTimeout(rsafe.t);rsafe.t=setTimeout(rsafe,1500);return}render()}
 // ===== GitHub-Abgleich =====
 const SK='packliste.sync',BK='packliste.base';
 const J=x=>JSON.stringify(x);
@@ -558,7 +643,7 @@ async function sync(){
    else if(!base&&!S.items.length&&S.tours.every(t=>!Object.keys(t.sel).length))merged=rd;
    else merged=m3(base?base.data:{},local,rd);
    if(J(merged)!==J(local)){const pg=S.page,vw=S.view;S=Object.assign(JSON.parse(J(merged)),{page:pg,view:vw});migrate();if(!S.tours.some(t=>t.id==S.cur))S.cur=S.tours[0]&&S.tours[0].id;
-    UND=[];last=snap();try{localStorage.setItem(K,J(S))}catch(e){}ubt();render()}
+    UND=[];last=snap();try{localStorage.setItem(K,J(S))}catch(e){}ubt();rsafe()}
    const out=sdata(S);
    if(!rd||J(out)!==J(rd)){const w=await gh('PUT',{message:'Packliste '+VER+' '+new Date().toISOString(),content:b64e(J(out)),...(rem?{sha:rem.sha}:{})});
     if(w.conflict)continue;lsSet(BK,{sha:w.content.sha,data:out})}
