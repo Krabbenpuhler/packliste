@@ -215,7 +215,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.17';
+const K='packliste.v1';const VER='v0.18';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -248,6 +248,7 @@ const cur=()=>page=='gear'?G0:T();
 const all=t=>S.items.concat(t.ex.map(e=>({...e,x:1})));
 const W=(t,i)=>t.ov[i.id]??i.g;
 const P=(t,i)=>t.pl[i.id]||(i.b?'b':'p');
+const grp=a=>{const o=[...new Set(a.map(i=>i.s))];return a.slice().sort((x,y)=>o.indexOf(x.s)-o.indexOf(y.s))};
 const fmt=g=>g>=1000?(g/1000).toFixed(2).replace('.',',')+' kg':Math.round(g)+' g';
 const uid=()=>'x'+Math.random().toString(36).slice(2,9);
 const ask=(m,def)=>new Promise(r=>{const d=$('#md'),i=$('#mi');$('#mt').textContent=m;i.hidden=def===undefined;i.value=def||'';d.returnValue='';d.onclose=()=>r(d.returnValue=='ok'?(def===undefined?true:i.value.trim()):null);d.showModal();if(def!==undefined)i.focus()});
@@ -266,7 +267,7 @@ function render(){
  let h=G?'':vbarHtml(t);
  for(const c of [...new Set(items.map(i=>i.c).concat(G?S.cats.map(x=>x.c):[]))]){
   let ci=list.filter(i=>i.c==c);if(!ci.length&&!(G&&!q))continue;
-  if(cmp)ci=ci.slice().sort(cmp);
+  ci=cmp?ci.slice().sort(cmp):grp(ci);
   const sl=ci.filter(i=>G||t.sel[i.id]),open=q||!closed.has(c);
   h+=`<section class="cat"><h2 data-a="fold" data-c="${esc(c)}"><span class="car">${open?'▾':'▸'}</span>${esc(c)}${G?`<button class="mini" data-a="rc" data-c="${esc(c)}" title="Kategorie umbenennen" aria-label="Kategorie umbenennen">✎</button><button class="mini" data-a="ai" data-c="${esc(c)}" title="Gegenstand in dieser Kategorie hinzufügen" aria-label="Gegenstand hinzufügen">＋</button>`:''}<small>${G?ci.length+' Teile':sl.length+' von '+ci.length+' gewählt'+bkh(t,sl)}</small></h2>`;
   if(open){let ls='',s=null;
@@ -279,7 +280,7 @@ function render(){
  $('#tot').innerHTML=G?'':`<div class="fr"><div><b>${fmt(bs)}</b><span>Basis</span></div><div><b>${fmt(vb)}</b><span>+ Verbrauch</span></div><div><b>${fmt(wa)}</b><span>+ Wasser</span></div><button class="fd" data-a="food" title="Essen eintragen"><b>${fmt(fd)}</b><span>+ Essen</span></button><div class="sm"><b>${fmt(bs+vb+wa+fd)}</b><span>= Rucksack</span></div></div><div class="fn">Am Körper ${fmt(bd)}, ${n} Teile gewählt, tippe für Details</div>`;
  if(!G){let r=`<h1>${esc(t.name+vName(t))}</h1><p>Basis ${fmt(bs)}, Verbrauch ${fmt(vb)}, Wasser ${fmt(wa)}, Essen ${fmt(fd)}, Rucksack gesamt ${fmt(bs+vb+wa+fd)}, am Körper ${fmt(bd)}</p>`;
  for(const c of [...new Set(items.map(i=>i.c))]){
-  const ci=items.filter(i=>i.c==c&&t.sel[i.id]);if(!ci.length)continue;
+  const ci=grp(items.filter(i=>i.c==c&&t.sel[i.id]));if(!ci.length)continue;
   r+=`<section><h2>${esc(c)}</h2><ul>`;let s=null;
   for(const i of ci){if(i.s!==s){s=i.s;if(s)r+=`</ul><h3>${esc(s)}</h3><ul>`}
    r+=`<li><span class="bx"></span><span>${N(t,i)>1?N(t,i)+'× ':''}${esc(i.n)}${P(t,i)=='b'?' <i>(am Körper)</i>':''}</span><span class="g">${W(t,i)*N(t,i)} g${F(t,i)&&!t.em[i.id]?' + '+F(t,i)*N(t,i):''}</span></li>`}
