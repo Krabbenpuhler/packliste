@@ -228,11 +228,11 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.22';
+const K='packliste.v1';const VER='v0.23';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
- S.tours.forEach(t=>{t.pn=t.pn||{};t.pn.an=t.pn.an||{d:'',rows:[]};t.pn.ab=t.pn.ab||{d:'',rows:[]};t.pn.links=t.pn.links||[];t.pn.todo=t.pn.todo||[];t.pn.notes=t.pn.notes||'';t.of=t.of||{};t.em=t.em||{};t.qt=t.qt||{};t.ax=t.ax||[];t.cur=t.cur||'€';t.fp=t.fp||{days:[]};t.ov=t.ov||{};t.pl=t.pl||{};t.ex=t.ex||[]});
+ S.tours.forEach(t=>{t.pn=t.pn||{};for(const k of ['an','ab']){const o=t.pn[k]||{};if(!o.days)t.pn[k]={days:[{id:k+'1',d:o.d||'',rows:o.rows||[]}]}}t.pn.links=t.pn.links||[];t.pn.todo=t.pn.todo||[];t.pn.notes=t.pn.notes||'';t.of=t.of||{};t.em=t.em||{};t.qt=t.qt||{};t.ax=t.ax||[];t.cur=t.cur||'€';t.fp=t.fp||{days:[]};t.ov=t.ov||{};t.pl=t.pl||{};t.ex=t.ex||[]});
  for(const p of D.patch){const it=S.items.find(i=>i.id==p.id);if(it&&it.f===undefined){if(it.g==p.og)it.g=p.g;it.f=p.f;it.t=p.t}}
  S.seeded=S.seeded||[];S.cats=S.cats||[];S.foods=S.foods||[];S.meals=S.meals||[];S.prof=S.prof||{h:190,w:81,age:'',sex:'m',pal:1.3};S.prof.sh=S.prof.sh||{b:25,l:15,d:35,s:25};
  {const gid=()=>'x'+Math.random().toString(36).slice(2,9);
@@ -397,6 +397,8 @@ $('#list').onclick=e=>{
  else if(a=='vd')return vDel(t);
  else if(a=='vc')return vcmp();
  else if(a=='pra')plist(t,el.dataset.sec).push({id:uid()});
+ else if(a=='pda'){const L=t.pn[el.dataset.sec].days,ld=L[L.length-1].d;let nd='';if(ld){const x=new Date(ld+'T00:00:00');x.setDate(x.getDate()+1);nd=ymd(x)}L.push({id:uid(),d:nd,rows:[{id:uid()}]})}
+ else if(a=='pdd'){const L=t.pn[el.dataset.sec].days,dy=L.find(x=>x.id==el.dataset.did2);if(!dy||L.length<2)return;if(dy.rows.some(r=>r.z||r.w||r.v)){return ask('Diesen Tag mit allen Zeilen löschen?').then(ok=>{if(ok){L.splice(L.indexOf(dy),1);save();render()}})}L.splice(L.indexOf(dy),1)}
  else if(a=='prd'){const L=plist(t,el.dataset.sec),k=L.findIndex(x=>x.id==el.dataset.rid);if(k>=0)L.splice(k,1)}
  save();render();
 };
@@ -548,7 +550,7 @@ $('#list').onchange=e=>{const el=e.target,t=T(),v=el.type=='checkbox'?(el.checke
  if(el.type=='date'&&v&&+String(v).slice(0,4)<1900)return;
  if(el.dataset.p){const[a,b]=el.dataset.p.split('.');b?S.prof[a][b]=v:S.prof[a]=v}
  else if(el.dataset.r)t.fp[el.dataset.r]=v;
- else if(el.dataset.pn){const sec=el.dataset.pn,k=el.dataset.k;if(sec=='notes')t.pn.notes=v;else if(el.dataset.rid){const r=plist(t,sec).find(x=>x.id==el.dataset.rid);if(r)r[k]=v}else t.pn[sec][k]=v}
+ else if(el.dataset.pn){const sec=el.dataset.pn,k=el.dataset.k;if(sec=='notes')t.pn.notes=v;else if(el.dataset.rid){const r=plist(t,sec).find(x=>x.id==el.dataset.rid);if(r)r[k]=v}else if(isDay(sec)){const dy=pday(t,sec);if(dy)dy[k]=v}else t.pn[sec][k]=v}
  else if(el.dataset.did){const d=t.fp.days.find(x=>x.id==el.dataset.did);if(d){const[a,b]=el.dataset.k.split('.');b?d[a][b]=v:d[a]=v;if(a=='nach'){const nx=t.fp.days[t.fp.days.indexOf(d)+1];if(nx&&!nx.von){nx.von=v;save();return render()}}}}
  else return;
  const quiet=el.tagName=='TEXTAREA'||(el.tagName=='INPUT'&&!['number','checkbox'].includes(el.type));
@@ -615,7 +617,9 @@ $('#wex').onclick=wexp;
 // ===== Planung =====
 const UE=['','Zelt','Hotel','Pension','Hütte / Bothy','Campingplatz','Hostel','Sonstiges'];
 const href=u=>{u=(u||'').trim();return /^https?:\/\//i.test(u)?u:'https://'+u};
-const plist=(t,sec)=>sec=='an'||sec=='ab'?t.pn[sec].rows:t.pn[sec];
+const isDay=sec=>sec.includes(':')||sec=='an'||sec=='ab';
+const pday=(t,sec)=>{const[k,id]=sec.split(':');const L=t.pn[k].days;return id?L.find(d=>d.id==id):L[0]};
+const plist=(t,sec)=>isDay(sec)?(pday(t,sec)||{rows:[]}).rows:t.pn[sec];
 function planHtml(t){const fp=t.fp,days=fp.days,pn=t.pn;
  const km=days.reduce((a,d)=>a+(+d.km||0),0),hm=days.reduce((a,d)=>a+(+d.hm||0),0),ueC={};days.forEach(d=>{if(d.ue)ueC[d.ue]=(ueC[d.ue]||0)+1});
  const lk=u=>u?`<a class="mini" href="${esc(href(u))}" target="_blank" rel="noopener" aria-label="Link öffnen" title="Link öffnen">↗</a>`:'';
@@ -624,7 +628,7 @@ function planHtml(t){const fp=t.fp,days=fp.days,pn=t.pn;
  let h=`<section class="cat"><h2>Zeitraum</h2><div class="fg"><label>Von<input type="date" data-r="from" value="${fp.from||''}"></label><label>Bis<input type="date" data-r="to" value="${fp.to||''}"></label><div><button data-a="fr">Tage anlegen</button></div></div><p class="hint">Gilt auch für die Essensplanung. Strecke und Höhenmeter trägst du nur einmal ein.</p></section>`;
  if(days.length)h+=`<div class="xs"><div><b>${days.length}</b><span>Tage</span></div><div><b>${nfi(km)} km</b><span>Strecke</span></div><div><b>${nfi(hm)} hm</b><span>Aufstieg</span></div>${Object.entries(ueC).map(([k,n])=>`<div><b>${n}×</b><span>${esc(k)}</span></div>`).join('')}</div>`;
  for(const[k,l]of[['an','Anreise'],['ab','Abreise']]){const s=pn[k];
-  h+=`<section class="cat"><h2>${l}<small><input type="date" data-pn="${k}" data-k="d" value="${s.d||''}" aria-label="${l}: Datum"></small></h2>${s.rows.map(r=>`<div class="prow"><input class="z" data-pn="${k}" data-rid="${r.id}" data-k="z" value="${esc(r.z||'')}" placeholder="Zeit" aria-label="Zeit"><input class="f" data-pn="${k}" data-rid="${r.id}" data-k="w" value="${esc(r.w||'')}" placeholder="Was, z. B. Flug Hamburg → Lissabon" aria-label="Was"><input class="f" data-pn="${k}" data-rid="${r.id}" data-k="v" value="${esc(r.v||'')}" placeholder="Wie, z. B. TAP, Flixbus" aria-label="Verkehrsmittel">${del(k,r,'Zeile')}</div>`).join('')}${add(k,'+ Zeile')}</section>`}
+  h+=`<section class="cat"><h2>${l}<small><button class="mini" data-a="pda" data-sec="${k}">+ ${l}tag</button></small></h2>${s.days.map((dy,di)=>{const sk=k+':'+dy.id;return`<h3 class="sl">${s.days.length>1?`${l}tag ${di+1}`:'Datum'}<input type="date" data-pn="${sk}" data-k="d" value="${dy.d||''}" aria-label="${l}: Datum"><small>${dy.d?fd(dy.d):''}</small>${s.days.length>1?`<button class="mini" data-a="pdd" data-sec="${k}" data-did2="${dy.id}" aria-label="${l}tag löschen" title="Tag löschen">✕</button>`:''}</h3>${dy.rows.map(r=>`<div class="prow"><input class="z" data-pn="${sk}" data-rid="${r.id}" data-k="z" value="${esc(r.z||'')}" placeholder="Zeit" aria-label="Zeit"><input class="f" data-pn="${sk}" data-rid="${r.id}" data-k="w" value="${esc(r.w||'')}" placeholder="Was, z. B. Flug Hamburg → Lissabon" aria-label="Was"><input class="f" data-pn="${sk}" data-rid="${r.id}" data-k="v" value="${esc(r.v||'')}" placeholder="Wie, z. B. TAP, Flixbus" aria-label="Verkehrsmittel">${del(sk,r,'Zeile')}</div>`).join('')}${add(sk,'+ Zeile')}`}).join('')}</section>`}
  if(days.length)h+=`<section class="cat"><h2>Etappen</h2>${days.map((d,i)=>`<div class="pg"><div class="wide"><b>Tag ${i+1}, ${fd(d.d)}</b></div><label>Von<input data-did="${d.id}" data-k="von" value="${esc(d.von||'')}"></label><label>Nach<input data-did="${d.id}" data-k="nach" value="${esc(d.nach||'')}"></label><label>Strecke (km)<input type="number" step="any" inputmode="decimal" data-did="${d.id}" data-k="km" value="${d.km??''}"></label><label>Aufstieg (hm)<input type="number" step="any" inputmode="decimal" data-did="${d.id}" data-k="hm" value="${d.hm??''}"></label><label>Übernachtung<select data-did="${d.id}" data-k="ue">${UE.map(o=>`<option value="${o}"${(d.ue||'')==o?' selected':''}>${o||'–'}</option>`).join('')}</select></label><label class="wide">Beschreibung<input data-did="${d.id}" data-k="ds" value="${esc(d.ds||'')}" placeholder="z. B. Anreise, Ruhetag, Resupply"></label></div>`).join('')}</section>`;
  else h+='<p>Lege oben einen Zeitraum an, dann entstehen die Tage für die Etappen.</p>';
  h+=`<section class="cat"><h2>Links</h2>${pn.links.map(r=>`<div class="prow"><input class="f" data-pn="links" data-rid="${r.id}" data-k="n" value="${esc(r.n||'')}" placeholder="Titel (optional)" aria-label="Titel"><input class="f" type="url" data-pn="links" data-rid="${r.id}" data-k="u" value="${esc(r.u||'')}" placeholder="https://…" aria-label="Adresse">${lk(r.u)}${del('links',r,'Link')}</div>`).join('')}${add('links','+ Link')}</section>`;
