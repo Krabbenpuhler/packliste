@@ -123,6 +123,11 @@ input::placeholder,textarea::placeholder{color:var(--mut);opacity:.55;font-style
 .pg label{font-size:.8rem;color:var(--mut)}
 .pg input,.pg select{width:100%;display:block;margin-top:2px}
 .pg .wide{grid-column:1/-1}
+.lrow{display:flex;gap:4px;align-items:center}
+.lrow input{flex:1;min-width:0}
+.gx{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.85rem;color:var(--mut)}
+.gx .ist{color:var(--ink)}
+.gx .warn{color:#C4572F;font-weight:600}
 .prow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:6px 12px;border-top:1px solid var(--line)}
 .prow input:not([type=checkbox]){min-width:0}
 .prow .z{flex:0 0 7em}
@@ -196,6 +201,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <label>Datei<input id="spath" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
 <p id="smsg" class="hint" style="padding:4px 0 0"></p>
 <div id="sbt"><button type="button" data-s="save">Speichern und verbinden</button><button type="button" data-s="now">Jetzt synchronisieren</button><button type="button" data-s="off">Trennen</button><button type="button" class="ghost" data-s="x">Schließen</button></div></dialog>
+<input type="file" id="gpxin" hidden>
 <dialog id="wdlg"><h3>Gewichtsübersicht</h3><div id="wbody"></div><div id="wb"><button type="button" data-wb="csv">Export (CSV)</button><button type="button" data-wb="x">Schließen</button></div></dialog>
 <dialog id="adlg"><h3>Bezeichnungen aufteilen</h3><p class="hint" style="padding:0 0 8px">Vorschläge aus deinen bisherigen Bezeichnungen. Prüfe und korrigiere sie, dann übernehmen. Abgewählte Gegenstände bleiben, wie sie sind.</p><div id="abody"></div><div id="abt"><button type="button" data-ab="ok">Ausgewählte übernehmen</button><button type="button" class="ghost" data-ab="x">Abbrechen</button></div></dialog>
 <dialog id="vdlg"><h3>Varianten vergleichen</h3><div id="vbody"></div><div id="vb"><button type="button">Schließen</button></div></dialog>
@@ -228,7 +234,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.23';
+const K='packliste.v1';const VER='v0.24';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -396,6 +402,8 @@ $('#list').onclick=e=>{
  else if(a=='vr')return vRen(t);
  else if(a=='vd')return vDel(t);
  else if(a=='vc')return vcmp();
+ else if(a=='gpx'){gpxDay=el.dataset.did;$('#gpxin').click();return}
+ else if(a=='gpxx'){const d=t.fp.days.find(v=>v.id==el.dataset.did);if(d)delete d.ist}
  else if(a=='pra')plist(t,el.dataset.sec).push({id:uid()});
  else if(a=='pda'){const L=t.pn[el.dataset.sec].days,ld=L[L.length-1].d;let nd='';if(ld){const x=new Date(ld+'T00:00:00');x.setDate(x.getDate()+1);nd=ymd(x)}L.push({id:uid(),d:nd,rows:[{id:uid()}]})}
  else if(a=='pdd'){const L=t.pn[el.dataset.sec].days,dy=L.find(x=>x.id==el.dataset.did2);if(!dy||L.length<2)return;if(dy.rows.some(r=>r.z||r.w||r.v)){return ask('Diesen Tag mit allen Zeilen löschen?').then(ok=>{if(ok){L.splice(L.indexOf(dy),1);save();render()}})}L.splice(L.indexOf(dy),1)}
@@ -581,6 +589,27 @@ $('#abody').oninput=$('#abody').onchange=e=>{const d=e.target.dataset;if(!d.ai||
 $('#abt').onclick=async e=>{const a=e.target.dataset.ab;if(!a)return;if(a=='x')return $('#adlg').close();
  let n=0;for(const i of S.items){const p=ASG[i.id];if(!p||!p.on)continue;const v={a:p.a,h:p.h,m:p.m,z:p.z};if(!nmk(v))continue;Object.assign(i,v,{nf:1});i.n=nmk(i);n++}
  $('#adlg').close();save();render();await ask(n+' Gegenstände umgestellt. Mit „Zurück“ machst du das rückgängig.')};
+// ===== GPX =====
+const hm2=s=>{s=Math.round(s/60);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+function gpxParse(x){const pts=[];const re=/<(trkpt|rtept)\b([^>]*)>([\s\S]*?)<\/\1>|<(trkpt|rtept)\b([^>]*)\/>/g;let m;
+ while((m=re.exec(x))){const at=m[2]||m[5]||'',body=m[3]||'',la=+(at.match(/\blat\s*=\s*["']([-\d.eE+]+)/)||[])[1],lo=+(at.match(/\blon\s*=\s*["']([-\d.eE+]+)/)||[])[1];
+  if(!isFinite(la)||!isFinite(lo))continue;const e=(body.match(/<ele>\s*([-\d.eE+]+)\s*<\/ele>/)||[])[1],tm=(body.match(/<time>\s*([^<\s]+)\s*<\/time>/)||[])[1];
+  pts.push({la,lo,e:e!==undefined?+e:null,t:tm?Date.parse(tm):NaN})}
+ if(pts.length<2)throw new Error('In der Datei wurden keine Wegpunkte gefunden.');
+ const R=6371008.8,rad=Math.PI/180;let dist=0,mov=0;
+ for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],dl=(b.la-a.la)*rad,dn=(b.lo-a.lo)*rad,h=Math.sin(dl/2)**2+Math.cos(a.la*rad)*Math.cos(b.la*rad)*Math.sin(dn/2)**2,d=2*R*Math.asin(Math.min(1,Math.sqrt(h)));dist+=d;
+  const dt=(b.t-a.t)/1000;if(dt>0&&dt<600&&d/dt>0.3)mov+=dt}
+ const el=pts.map(p=>p.e).filter(v=>v!==null&&isFinite(v));let up=0;
+ if(el.length>1){const w=5,sm=el.map((_,i)=>{let s=0,n=0;for(let j=Math.max(0,i-w);j<=Math.min(el.length-1,i+w);j++){s+=el[j];n++}return s/n});let ref=sm[0];for(const v of sm){if(v-ref>=3){up+=v-ref;ref=v}else if(v<ref)ref=v}}
+ const ts=pts.map(p=>p.t).filter(isFinite),t0=ts.length?new Date(Math.min(...ts)):null,t1=ts.length?new Date(Math.max(...ts)):null,hh=d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+ const nm=((x.match(/<trk>[\s\S]*?<name>([\s\S]*?)<\/name>/)||x.match(/<metadata>[\s\S]*?<name>([\s\S]*?)<\/name>/)||[])[1]||'').replace(/<!\[CDATA\[|\]\]>/g,'').trim();
+ return{km:Math.round(dist/100)/10,hm:Math.round(up),mov:Math.round(mov),d:t0?ymd(t0):'',t0:t0?hh(t0):'',t1:t1?hh(t1):'',name:nm,n:pts.length}}
+let gpxDay=null;
+$('#gpxin').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f||!gpxDay)return;
+ f.text().then(x=>{let r;try{r=gpxParse(x)}catch(er){return ask('Die GPX-Datei konnte nicht gelesen werden. '+(er.message||''))}
+  const t=T(),d=t.fp.days.find(v=>v.id==gpxDay);if(!d)return;
+  d.km=r.km;d.hm=r.hm;d.ist={f:f.name.replace(/\.gpx$/i,''),km:r.km,hm:r.hm,mov:r.mov,d:r.d,t0:r.t0,t1:r.t1};
+  if(!d.ds&&r.name)d.ds=r.name;save();render()})};
 // ===== Varianten =====
 const VF=['sel','pl','qt','ov','of','em','food'];
 const cl=x=>JSON.parse(JSON.stringify(x??null));
@@ -629,7 +658,7 @@ function planHtml(t){const fp=t.fp,days=fp.days,pn=t.pn;
  if(days.length)h+=`<div class="xs"><div><b>${days.length}</b><span>Tage</span></div><div><b>${nfi(km)} km</b><span>Strecke</span></div><div><b>${nfi(hm)} hm</b><span>Aufstieg</span></div>${Object.entries(ueC).map(([k,n])=>`<div><b>${n}×</b><span>${esc(k)}</span></div>`).join('')}</div>`;
  for(const[k,l]of[['an','Anreise'],['ab','Abreise']]){const s=pn[k];
   h+=`<section class="cat"><h2>${l}<small><button class="mini" data-a="pda" data-sec="${k}">+ ${l}tag</button></small></h2>${s.days.map((dy,di)=>{const sk=k+':'+dy.id;return`<h3 class="sl">${s.days.length>1?`${l}tag ${di+1}`:'Datum'}<input type="date" data-pn="${sk}" data-k="d" value="${dy.d||''}" aria-label="${l}: Datum"><small>${dy.d?fd(dy.d):''}</small>${s.days.length>1?`<button class="mini" data-a="pdd" data-sec="${k}" data-did2="${dy.id}" aria-label="${l}tag löschen" title="Tag löschen">✕</button>`:''}</h3>${dy.rows.map(r=>`<div class="prow"><input class="z" data-pn="${sk}" data-rid="${r.id}" data-k="z" value="${esc(r.z||'')}" placeholder="Zeit" aria-label="Zeit"><input class="f" data-pn="${sk}" data-rid="${r.id}" data-k="w" value="${esc(r.w||'')}" placeholder="Was, z. B. Flug Hamburg → Lissabon" aria-label="Was"><input class="f" data-pn="${sk}" data-rid="${r.id}" data-k="v" value="${esc(r.v||'')}" placeholder="Wie, z. B. TAP, Flixbus" aria-label="Verkehrsmittel">${del(sk,r,'Zeile')}</div>`).join('')}${add(sk,'+ Zeile')}`}).join('')}</section>`}
- if(days.length)h+=`<section class="cat"><h2>Etappen</h2>${days.map((d,i)=>`<div class="pg"><div class="wide"><b>Tag ${i+1}, ${fd(d.d)}</b></div><label>Von<input data-did="${d.id}" data-k="von" value="${esc(d.von||'')}"></label><label>Nach<input data-did="${d.id}" data-k="nach" value="${esc(d.nach||'')}"></label><label>Strecke (km)<input type="number" step="any" inputmode="decimal" data-did="${d.id}" data-k="km" value="${d.km??''}"></label><label>Aufstieg (hm)<input type="number" step="any" inputmode="decimal" data-did="${d.id}" data-k="hm" value="${d.hm??''}"></label><label>Übernachtung<select data-did="${d.id}" data-k="ue">${UE.map(o=>`<option value="${o}"${(d.ue||'')==o?' selected':''}>${o||'–'}</option>`).join('')}</select></label><label class="wide">Beschreibung<input data-did="${d.id}" data-k="ds" value="${esc(d.ds||'')}" placeholder="z. B. Anreise, Ruhetag, Resupply"></label></div>`).join('')}</section>`;
+ if(days.length)h+=`<section class="cat"><h2>Etappen</h2>${days.map((d,i)=>`<div class="pg"><div class="wide"><b>Tag ${i+1}, ${fd(d.d)}</b></div><label>Von<input data-did="${d.id}" data-k="von" value="${esc(d.von||'')}"></label><label>Nach<input data-did="${d.id}" data-k="nach" value="${esc(d.nach||'')}"></label><label>Strecke (km)<input type="number" step="any" inputmode="decimal" data-did="${d.id}" data-k="km" value="${d.km??''}"></label><label>Aufstieg (hm)<input type="number" step="any" inputmode="decimal" data-did="${d.id}" data-k="hm" value="${d.hm??''}"></label><label>Übernachtung<select data-did="${d.id}" data-k="ue">${UE.map(o=>`<option value="${o}"${(d.ue||'')==o?' selected':''}>${o||'–'}</option>`).join('')}</select></label><label class="wide">Beschreibung<input data-did="${d.id}" data-k="ds" value="${esc(d.ds||'')}" placeholder="z. B. Anreise, Ruhetag, Resupply"></label><label class="wide">Strava-Link<span class="lrow"><input type="url" data-did="${d.id}" data-k="sl" value="${esc(d.sl||'')}" placeholder="https://www.strava.com/activities/…">${lk(d.sl)}</span></label><div class="wide gx"><button data-a="gpx" data-did="${d.id}">GPX laden</button>${d.ist?`<span class="ist">Ist (GPX${d.ist.f?': '+esc(d.ist.f):''}): ${String(d.ist.km).replace('.',',')} km, ${nfi(d.ist.hm)} hm${d.ist.mov?', '+hm2(d.ist.mov)+' h unterwegs':''}${d.ist.t0?', '+esc(d.ist.t0)+(d.ist.t1?'–'+esc(d.ist.t1):''):''}${d.ist.d&&d.ist.d!==d.d?` <b class="warn">Datum der Aufzeichnung: ${fd(d.ist.d)}</b>`:''}</span><button class="mini" data-a="gpxx" data-did="${d.id}" title="Hinweis auf GPX-Daten entfernen">✕</button>`:''}</div></div>`).join('')}</section>`;
  else h+='<p>Lege oben einen Zeitraum an, dann entstehen die Tage für die Etappen.</p>';
  h+=`<section class="cat"><h2>Links</h2>${pn.links.map(r=>`<div class="prow"><input class="f" data-pn="links" data-rid="${r.id}" data-k="n" value="${esc(r.n||'')}" placeholder="Titel (optional)" aria-label="Titel"><input class="f" type="url" data-pn="links" data-rid="${r.id}" data-k="u" value="${esc(r.u||'')}" placeholder="https://…" aria-label="Adresse">${lk(r.u)}${del('links',r,'Link')}</div>`).join('')}${add('links','+ Link')}</section>`;
  const op=pn.todo.filter(x=>!x.x).length;
