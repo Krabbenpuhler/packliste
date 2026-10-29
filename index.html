@@ -228,7 +228,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.21';
+const K='packliste.v1';const VER='v0.22';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -265,8 +265,8 @@ const grp=a=>{const so=[...new Set(a.map(i=>i.s))],ak=i=>i.s+'\u0001'+(i.a||''),
 const nmk=v=>[v.a,v.h,v.m,v.z].map(x=>(x||'').trim()).filter(Boolean).join(', ');
 const dn=i=>{if(!i.nf)return i.n;const hm=[i.h,i.m].filter(Boolean).join(' ');return hm?hm+(i.z?', '+i.z:''):(i.a||'')+(i.z?', '+i.z:'')||i.n};
 const opts=a=>[...new Set(a.filter(Boolean))].sort((x,y)=>x.localeCompare(y,'de')).map(v=>`<option value="${esc(v)}">`).join('');
-const BRANDS=['Altra','Anker','Apple','Arc\'teryx','Atompacks','BIC','Big Agnes','Black Diamond','BRS','Campinggaz','Ceduna','CEP','Craft','Cumulus','Darn Tough','Decathlon','Deuter','Durston','Exped','Falke','Garmin','Groundhog','Hoka','Hyperlite','Icebreaker','Ikea','Injinji','Katadyn','La Sportiva','Lemminge','Montbell','Mountain Equipment','Moxyhike','Nemo','Nitecore','Osprey','Patagonia','Petzl','Rab','Rock Font','Rock Front','Salomon','Sawyer','Sea to Summit','SeatoSummit','Sensodyne','Silva','Six Moons Design','Smartwool','Therm-a-Rest','Toaks','Trekology','Vaude','Victorinox','Volvic','WildSkyGear','Zpacks'];
-const BRCANON={SeatoSummit:'Sea to Summit'};
+const BRANDS=['Altra','Anker','Apple','Arc\'teryx','Atompacks','BIC','Big Agnes','Black Diamond','BRS','Campinggaz','Ceduna','CEP','Craft','Cumulus','Darn Tough','Decathlon','Deuter','Durston','Exped','Falke','Garmin','Groundhog','Hoka','Hyperlite','Icebreaker','Ikea','Injinji','Katadyn','La Sportiva','Lemminge','Montbell','Mountain Equipment','Moxyhike','Nemo','Nitecore','Osprey','Patagonia','Petzl','Rab','Rock Front','Rock Font','Salomon','Sawyer','Sea to Summit','SeatoSummit','Sensodyne','Silva','Six Moons Design','Smartwool','Therm-a-Rest','Toaks','Trekology','Vaude','Victorinox','Volvic','WildSkyGear','Zpacks'];
+const BRCANON={SeatoSummit:'Sea to Summit','Rock Font':'Rock Front'};
 const brands=()=>[...new Set(BRANDS.map(b=>BRCANON[b]||b).concat(S.items.map(i=>i.h)).filter(Boolean))];
 function sugg(i){const BR=[...new Set(BRANDS.concat(S.items.map(x=>x.h)).filter(Boolean))].sort((a,b)=>b.length-a.length);
  const ZR=/^(#\d+|(XXS|XS|S|M|L|XL|XXL)|Größe .+|blau|schwarz|rot|grün|grau|weiß|gelb|orange|lila|braun|beige|oliv)$/i;
@@ -414,7 +414,7 @@ $('#exp').onclick=async()=>{const s=JSON.stringify(S);let d=null;try{d=await win
  if(d){try{await d.save({filename:'packliste-sicherung_'+VER+'.json',data:s})}catch(_){}return}
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'application/json'}));a.download='packliste-sicherung_'+VER+'.json';a.click()};
 $('#imp').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(async x=>{try{const d=JSON.parse(x);if(d&&d.packliste_neu){let n=0,sk=0;for(const x of d.add||[]){if(S.items.some(i=>i.id==x.id)){sk++;continue}const it={c:'Sonstiges',s:'',a:'',h:'',m:'',z:'',g:0,b:0,f:0,t:'v',q:1,...x,nf:1};it.n=nmk(it);S.items.push(it);n++}save();render();e.target.value='';return ask(n+' Gegenstand/Gegenstände zur Ausrüstung hinzugefügt'+(sk?', '+sk+' waren schon vorhanden':'')+'.')}
-if(d&&d.packliste_aufteilung){let n=0,sk=0;const ap=i=>{const p=d.items[i.id];if(!p)return;if(i.nf){sk++;return}Object.assign(i,{s:p.s||i.s,a:p.a||'',h:p.h||'',m:p.m||'',z:p.z||'',nf:1});i.n=nmk(i)||i.n;n++};S.items.forEach(ap);S.tours.forEach(t=>t.ex.forEach(ap));save();render();e.target.value='';return ask(n+' Gegenstände neu eingeordnet'+(sk?', '+sk+' schon aufgeteilte unverändert gelassen':'')+'. Mit „Zurück“ machst du das rückgängig.')}if(!d.items||!d.tours)throw 0;if(await ask('Aktuelle Daten durch die Sicherung ersetzen?')){S=d;migrate();page=S.page||page;save();render()}}catch(_){await ask('Die Datei konnte nicht gelesen werden.')}e.target.value=''})};
+if(d&&d.packliste_aufteilung){let n=0,sk=0;const hit=S.items.concat(...S.tours.map(t=>t.ex)).filter(i=>d.items[i.id]),pre=hit.filter(i=>i.nf).length;const ow=pre?!!(await ask(pre+' dieser Gegenstände sind schon aufgeteilt, zum Beispiel über den Bearbeiten-Dialog. Auch diese mit der Datei überschreiben? (Abbrechen = nur die übrigen)')):false;const ap=i=>{const p=d.items[i.id];if(!p)return;if(i.nf&&!ow){sk++;return}Object.assign(i,{s:p.s||i.s,a:p.a||'',h:p.h||'',m:p.m||'',z:p.z||'',nf:1});i.n=nmk(i)||i.n;n++};S.items.forEach(ap);S.tours.forEach(t=>t.ex.forEach(ap));save();render();e.target.value='';return ask(n+' Gegenstände neu eingeordnet'+(sk?', '+sk+' schon aufgeteilte unverändert gelassen':'')+'. Mit „Zurück“ machst du das rückgängig.')}if(!d.items||!d.tours)throw 0;if(await ask('Aktuelle Daten durch die Sicherung ersetzen?')){S=d;migrate();page=S.page||page;save();render()}}catch(_){await ask('Die Datei konnte nicht gelesen werden.')}e.target.value=''})};
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{page=b.dataset.p;S.page=page;save();render()});
 $('#tot').onclick=async e=>{if(!e.target.closest('[data-a=food]'))return wopen();const t=T(),v=await ask('Essen für diese Tour in Gramm?',String(t.food||0));if(v!==null){t.food=Math.max(0,Math.round(+v.replace(',','.')||0));save();render()}};
 async function ren(k,c,s){const o=k=='c'?c:s,n=await ask(k=='c'?'Neuer Name der Kategorie?':'Neuer Name der Unterkategorie?',o);if(!n||n==o)return;
