@@ -184,7 +184,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <span id="lgd" class="lg"><i class="lb"></i>am Körper<i class="lp"></i>Rucksack</span><button id="add">Gegenstand hinzufügen</button><button id="addc">Kategorie hinzufügen</button><button id="asst">Bezeichnungen aufteilen</button><button id="prt">Checkliste drucken</button><button id="wex">Gewichte exportieren</button></div>
 <main id="list"></main>
 <details class="data"><summary>Datensicherung</summary>
-<button id="sopen">Synchronisation</button><button id="exp">Sicherung speichern</button><input id="imp" type="file" accept=".json" aria-label="Sicherung laden"></details>
+<button id="sopen">Synchronisation</button><button id="exp">Sicherung speichern</button><input id="imp" type="file" accept=".json" aria-label="Sicherung oder Aufteilung laden"></details>
 <footer id="tot"></footer>
 </div>
 <div id="pr"></div>
@@ -228,7 +228,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.19';
+const K='packliste.v1';const VER='v0.20';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -413,7 +413,7 @@ $('#del').onclick=async()=>{if(S.tours.length<2)return ask('Mindestens eine Tour
 $('#exp').onclick=async()=>{const s=JSON.stringify(S);let d=null;try{d=await window.claude?.use('downloads')}catch(_){}
  if(d){try{await d.save({filename:'packliste-sicherung_'+VER+'.json',data:s})}catch(_){}return}
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'application/json'}));a.download='packliste-sicherung_'+VER+'.json';a.click()};
-$('#imp').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(async x=>{try{const d=JSON.parse(x);if(!d.items||!d.tours)throw 0;if(await ask('Aktuelle Daten durch die Sicherung ersetzen?')){S=d;migrate();page=S.page||page;save();render()}}catch(_){await ask('Die Datei konnte nicht gelesen werden.')}e.target.value=''})};
+$('#imp').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(async x=>{try{const d=JSON.parse(x);if(d&&d.packliste_aufteilung){let n=0,sk=0;const ap=i=>{const p=d.items[i.id];if(!p)return;if(i.nf){sk++;return}Object.assign(i,{s:p.s||i.s,a:p.a||'',h:p.h||'',m:p.m||'',z:p.z||'',nf:1});i.n=nmk(i)||i.n;n++};S.items.forEach(ap);S.tours.forEach(t=>t.ex.forEach(ap));save();render();e.target.value='';return ask(n+' Gegenstände neu eingeordnet'+(sk?', '+sk+' schon aufgeteilte unverändert gelassen':'')+'. Mit „Zurück“ machst du das rückgängig.')}if(!d.items||!d.tours)throw 0;if(await ask('Aktuelle Daten durch die Sicherung ersetzen?')){S=d;migrate();page=S.page||page;save();render()}}catch(_){await ask('Die Datei konnte nicht gelesen werden.')}e.target.value=''})};
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{page=b.dataset.p;S.page=page;save();render()});
 $('#tot').onclick=async e=>{if(!e.target.closest('[data-a=food]'))return wopen();const t=T(),v=await ask('Essen für diese Tour in Gramm?',String(t.food||0));if(v!==null){t.food=Math.max(0,Math.round(+v.replace(',','.')||0));save();render()}};
 async function ren(k,c,s){const o=k=='c'?c:s,n=await ask(k=='c'?'Neuer Name der Kategorie?':'Neuer Name der Unterkategorie?',o);if(!n||n==o)return;
