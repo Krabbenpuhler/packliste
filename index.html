@@ -49,6 +49,17 @@ main{max-width:900px;margin:auto;padding:0 16px 24px}
 .cat h2 small{margin-left:auto;font:400 .8rem system-ui;color:var(--mut);text-align:right}
 .car{width:1em;color:var(--mut)}
 .cat h3{margin:0;padding:6px 12px 2px;font-size:.9rem;color:var(--mut);font-weight:600}
+.cat h4{margin:0;padding:4px 12px 0 24px;font-size:.8rem;color:var(--mut);font-weight:600;font-style:italic;display:flex;align-items:center;gap:4px}
+.cat h4+ul .row{padding-left:24px}
+.dg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0 8px}
+#dlg{width:min(560px,96vw)}
+#adlg{width:min(760px,96vw);max-height:90vh;overflow:auto;padding-bottom:0}
+#abt{position:sticky;bottom:0;background:var(--card);padding:10px 0 16px}
+.ah{margin:14px 0 2px;font:700 1rem Georgia,serif}
+.ar{border-top:1px solid var(--line);padding:8px 0}
+.ar small{color:var(--mut)}
+.ag{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0 6px}
+.ag label{margin-bottom:0}
 ul{list-style:none;margin:0;padding:0}
 .row{display:flex;align-items:center;gap:8px;padding:6px 12px;border-top:1px solid var(--line);border-left:4px solid transparent}
 .row:first-child{border-top:0}
@@ -143,8 +154,8 @@ dialog h3{margin:0 0 10px;font:700 1.2rem Georgia,serif}
 dialog label{display:block;margin-bottom:8px;font-size:.85rem;color:var(--mut)}
 dialog input,dialog select{width:100%;display:block;margin-top:2px}
 #mb{display:flex;flex-direction:row-reverse;gap:8px;justify-content:flex-end;margin-top:12px}
-#acts,#xb,#fdb,#cbt,#sbt{display:flex;flex-direction:column;gap:6px;margin-top:12px}
-#acts .ghost,#xb .ghost,#fdb .ghost,#cbt .ghost,#sbt .ghost{border-color:transparent;color:var(--mut)}
+#acts,#xb,#fdb,#cbt,#sbt,#abt{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+#acts .ghost,#xb .ghost,#fdb .ghost,#cbt .ghost,#sbt .ghost,#abt .ghost{border-color:transparent;color:var(--mut)}
 #pr{display:none}
 @media print{
  body{background:#fff;color:#000;font:10pt/1.35 system-ui,sans-serif}
@@ -155,6 +166,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
  #pr section{break-inside:avoid-page;margin-bottom:8px}
  #pr h2{font:700 12pt Georgia,serif;margin:6px 0 2px;border-bottom:1px solid #000}
  #pr h3{font-size:9pt;margin:4px 0 0;color:#333}
+ #pr h4{font-size:8pt;margin:2px 0 0 6px;color:#555;font-style:italic}
  #pr li{display:flex;gap:6px;align-items:center;padding:1.5px 0;break-inside:avoid}
  #pr .bx{width:3.2mm;height:3.2mm;border:1px solid #000;flex:none}
  #pr .g{margin-left:auto;color:#333;white-space:nowrap}
@@ -169,7 +181,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div class="bar" id="bar"><input id="q" type="search" placeholder="Suchen" aria-label="Suchen">
 <select id="so" aria-label="Sortierung"><option value="cat">Nach Kategorie</option><option value="name">Nach Name</option><option value="gd">Schwerste zuerst</option><option value="ga">Leichteste zuerst</option></select>
 <label><input type="checkbox" id="on">Nur ausgewählte</label>
-<span id="lgd" class="lg"><i class="lb"></i>am Körper<i class="lp"></i>Rucksack</span><button id="add">Gegenstand hinzufügen</button><button id="addc">Kategorie hinzufügen</button><button id="prt">Checkliste drucken</button><button id="wex">Gewichte exportieren</button></div>
+<span id="lgd" class="lg"><i class="lb"></i>am Körper<i class="lp"></i>Rucksack</span><button id="add">Gegenstand hinzufügen</button><button id="addc">Kategorie hinzufügen</button><button id="asst">Bezeichnungen aufteilen</button><button id="prt">Checkliste drucken</button><button id="wex">Gewichte exportieren</button></div>
 <main id="list"></main>
 <details class="data"><summary>Datensicherung</summary>
 <button id="sopen">Synchronisation</button><button id="exp">Sicherung speichern</button><input id="imp" type="file" accept=".json" aria-label="Sicherung laden"></details>
@@ -185,6 +197,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <p id="smsg" class="hint" style="padding:4px 0 0"></p>
 <div id="sbt"><button type="button" data-s="save">Speichern und verbinden</button><button type="button" data-s="now">Jetzt synchronisieren</button><button type="button" data-s="off">Trennen</button><button type="button" class="ghost" data-s="x">Schließen</button></div></dialog>
 <dialog id="wdlg"><h3>Gewichtsübersicht</h3><div id="wbody"></div><div id="wb"><button type="button" data-wb="csv">Export (CSV)</button><button type="button" data-wb="x">Schließen</button></div></dialog>
+<dialog id="adlg"><h3>Bezeichnungen aufteilen</h3><p class="hint" style="padding:0 0 8px">Vorschläge aus deinen bisherigen Bezeichnungen. Prüfe und korrigiere sie, dann übernehmen. Abgewählte Gegenstände bleiben, wie sie sind.</p><div id="abody"></div><div id="abt"><button type="button" data-ab="ok">Ausgewählte übernehmen</button><button type="button" class="ghost" data-ab="x">Abbrechen</button></div></dialog>
 <dialog id="vdlg"><h3>Varianten vergleichen</h3><div id="vbody"></div><div id="vb"><button type="button">Schließen</button></div></dialog>
 <dialog id="fdlg"><h3 id="ftit"></h3>
 <label id="fart">Art<select id="fsa"><option value="f">Lebensmittel</option><option value="m">Gericht</option></select></label>
@@ -203,19 +216,19 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <label>Beschreibung (optional)<input id="xn"></label>
 <div id="xb"></div></dialog>
 <dialog id="dlg"><h3 id="dt"></h3>
-<label>Bezeichnung<input id="fn"></label>
-<label>Kategorie<input id="fc" list="cl"></label>
-<label>Unterkategorie<input id="fs" list="sl"></label>
+<div class="dg"><label>Kategorie<input id="fc" list="cl" autocomplete="off"></label><label>Unterkategorie<input id="fs" list="sl" autocomplete="off"></label><label>Art (optional)<input id="fa" list="al" autocomplete="off" placeholder="z. B. Wandersocken"></label></div>
+<div class="dg"><label>Hersteller<input id="fh" list="hl" autocomplete="off" placeholder="z. B. CEP"></label><label>Modell<input id="fn" autocomplete="off" placeholder="z. B. Merino"></label><label>Zusatz (optional)<input id="fz" autocomplete="off" placeholder="Größe, Farbe, #1"></label></div>
+<p id="fold" class="hint" style="padding:0 0 8px"></p>
 <label>Gewicht (leer) in g<input id="fg" type="number" min="0" inputmode="numeric"></label>
 <label>Zusatzgewicht bei voll in g (optional)<input id="ff" type="number" min="0" inputmode="numeric"></label>
 <label>Inhalt<select id="ft"><option value="v">Verbrauchsmaterial</option><option value="w">Wasser</option></select></label>
 <label>Anzahl vorhanden<input id="fq" type="number" min="1" inputmode="numeric"></label>
 <label>Kaufpreis je Stück in € (optional)<input id="fpz" type="number" min="0" step="0.01" inputmode="decimal"></label>
-<datalist id="cl"></datalist><datalist id="sl"></datalist>
+<datalist id="cl"></datalist><datalist id="sl"></datalist><datalist id="al"></datalist><datalist id="hl"></datalist>
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.18';
+const K='packliste.v1';const VER='v0.19';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -248,7 +261,36 @@ const cur=()=>page=='gear'?G0:T();
 const all=t=>S.items.concat(t.ex.map(e=>({...e,x:1})));
 const W=(t,i)=>t.ov[i.id]??i.g;
 const P=(t,i)=>t.pl[i.id]||(i.b?'b':'p');
-const grp=a=>{const o=[...new Set(a.map(i=>i.s))];return a.slice().sort((x,y)=>o.indexOf(x.s)-o.indexOf(y.s))};
+const grp=a=>{const so=[...new Set(a.map(i=>i.s))],ak=i=>i.s+'\u0001'+(i.a||''),ao=[...new Set(a.map(ak))];return a.slice().sort((x,y)=>so.indexOf(x.s)-so.indexOf(y.s)||ao.indexOf(ak(x))-ao.indexOf(ak(y)))};
+const nmk=v=>[v.a,v.h,v.m,v.z].map(x=>(x||'').trim()).filter(Boolean).join(', ');
+const dn=i=>{if(!i.nf)return i.n;const hm=[i.h,i.m].filter(Boolean).join(' ');return hm?hm+(i.z?', '+i.z:''):(i.a||'')+(i.z?', '+i.z:'')||i.n};
+const opts=a=>[...new Set(a.filter(Boolean))].sort((x,y)=>x.localeCompare(y,'de')).map(v=>`<option value="${esc(v)}">`).join('');
+const BRANDS=['Altra','Anker','Apple','Arc\'teryx','Atompacks','BIC','Big Agnes','Black Diamond','BRS','Campinggaz','Ceduna','CEP','Craft','Cumulus','Darn Tough','Decathlon','Deuter','Durston','Exped','Falke','Garmin','Groundhog','Hoka','Hyperlite','Icebreaker','Ikea','Injinji','Katadyn','La Sportiva','Lemminge','Montbell','Mountain Equipment','Moxyhike','Nemo','Nitecore','Osprey','Patagonia','Petzl','Rab','Rock Font','Rock Front','Salomon','Sawyer','Sea to Summit','SeatoSummit','Sensodyne','Silva','Six Moons Design','Smartwool','Therm-a-Rest','Toaks','Trekology','Vaude','Victorinox','Volvic','WildSkyGear','Zpacks'];
+const BRCANON={SeatoSummit:'Sea to Summit'};
+const brands=()=>[...new Set(BRANDS.map(b=>BRCANON[b]||b).concat(S.items.map(i=>i.h)).filter(Boolean))];
+function sugg(i){const BR=[...new Set(BRANDS.concat(S.items.map(x=>x.h)).filter(Boolean))].sort((a,b)=>b.length-a.length);
+ const ZR=/^(#\d+|(XXS|XS|S|M|L|XL|XXL)|Größe .+|blau|schwarz|rot|grün|grau|weiß|gelb|orange|lila|braun|beige|oliv)$/i;
+ let parts=String(i.n||'').split(/,\s+/).map(x=>x.trim()).filter(Boolean),z=[],h='',R=[];
+ for(let p of parts){const m=p.match(/^(.*\S)\s+(#\d+)$/);if(m){p=m[1];z.push(m[2])}
+  if(ZR.test(p)){z.push(p);continue}
+  if(!h){for(const b of BR){const L=p.toLowerCase(),B=b.toLowerCase();let k=L.indexOf(B);
+    while(k>=0){const pre=k==0||p[k-1]==' ',nx=p[k+b.length];if(pre&&(nx===undefined||nx==' '||(k==0&&nx>='A'&&nx<='Z'&&nx!=nx.toLowerCase())))break;k=L.indexOf(B,k+1)}
+    if(k>=0){h=BRCANON[b]||b;p=(p.slice(0,k)+' '+p.slice(k+b.length)).replace(/\s+/g,' ').replace(/^[\s\-–]+|[\s\-–]+$/g,'');break}}}
+  if(p)R.push(p)}
+ let a='',mo='';if(R.length>=2){a=R[0];mo=R.slice(1).join(', ')}else mo=R[0]||'';
+ if(a&&i.s&&a.toLowerCase()==i.s.toLowerCase())a='';
+ return{a,h,m:mo,z:z.join(', ')}}
+function dls(){const c=$('#fc').value.trim(),s=$('#fs').value.trim(),A=all(cur()).concat(S.cats);
+ $('#cl').innerHTML=opts(A.map(i=>i.c));$('#sl').innerHTML=opts(A.filter(i=>!c||i.c==c).map(i=>i.s));
+ $('#al').innerHTML=opts(A.filter(i=>(!c||i.c==c)&&(!s||i.s==s)).map(i=>i.a));$('#hl').innerHTML=opts(brands())}
+async function rena(c,s,a){const n=await ask('Neuer Name der Art?',a);if(!n||n==a)return;
+ const f=i=>{if(i.c==c&&i.s==s&&(i.a||'')==a){i.a=n;if(i.nf)i.n=nmk(i)}};S.items.forEach(f);S.tours.forEach(t=>t.ex.forEach(f));save();render()}
+let ASG={};
+function aopen(){ASG={};const L=S.items.filter(i=>!i.nf);for(const i of L)ASG[i.id]={...sugg(i),on:1};
+ const cats=[...new Set(L.map(i=>i.c))];
+ $('#hl').innerHTML=opts(brands());
+ $('#abody').innerHTML=cats.map(c=>`<h4 class="ah">${esc(c)}</h4>`+L.filter(i=>i.c==c).map(i=>{const p=ASG[i.id];return`<div class="ar"><label class="ck"><input type="checkbox" data-ai="${i.id}" data-k="on" checked><b>${esc(i.n)}</b> <small>${esc(i.s)}</small></label><div class="ag">${[['a','Art'],['h','Hersteller'],['m','Modell'],['z','Zusatz']].map(([k,l])=>`<label>${l}<input data-ai="${i.id}" data-k="${k}" value="${esc(p[k])}"${k=='h'?' list="hl"':''} autocomplete="off"></label>`).join('')}</div></div>`}).join('')).join('');
+ $('#adlg').showModal()}
 const fmt=g=>g>=1000?(g/1000).toFixed(2).replace('.',',')+' kg':Math.round(g)+' g';
 const uid=()=>'x'+Math.random().toString(36).slice(2,9);
 const ask=(m,def)=>new Promise(r=>{const d=$('#md'),i=$('#mi');$('#mt').textContent=m;i.hidden=def===undefined;i.value=def||'';d.returnValue='';d.onclose=()=>r(d.returnValue=='ok'?(def===undefined?true:i.value.trim()):null);d.showModal();if(def!==undefined)i.focus()});
@@ -257,13 +299,13 @@ let q='',sort='cat',only=false,closed=new Set(),ed=null,page=S.page||'gear',view
 function render(){
  const t=cur(),G=page=='gear',items=all(t),E=!G&&view!='pack';
  $('#sub').hidden=G;$('#bar').hidden=E;document.querySelectorAll('#sub button').forEach(b=>b.setAttribute('aria-current',b.dataset.v==view?'page':'false'));
- $('#trbar').hidden=G;$('#tot').hidden=G;$('#addc').hidden=!G;$('#lgd').hidden=G;$('#on').parentElement.hidden=G;$('#prt').hidden=G;$('#wex').hidden=G;
+ $('#trbar').hidden=G;$('#tot').hidden=G;$('#addc').hidden=!G;{const lc=S.items.filter(i=>!i.nf).length;$('#asst').hidden=!G||!lc;$('#asst').textContent='Bezeichnungen aufteilen ('+lc+')'}$('#lgd').hidden=G;$('#on').parentElement.hidden=G;$('#prt').hidden=G;$('#wex').hidden=G;
  document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-current',b.dataset.p==page?'page':'false'));
  $('#tour').innerHTML=S.tours.map(x=>`<option value="${x.id}"${x.id==t.id?' selected':''}>${esc(x.name)}</option>`).join('');
  if(E){$('#tot').hidden=true;$('#list').innerHTML=view=='food'?foodHtml(t):view=='plan'?planHtml(t):expHtml(t);return}
  const list=items.filter(i=>(G||!only||t.sel[i.id])&&(!q||(i.n+i.c+i.s).toLowerCase().includes(q)));
  const cmp={cat:null,name:(a,b)=>a.n.localeCompare(b.n,'de'),gd:(a,b)=>X(t,b)-X(t,a),ga:(a,b)=>X(t,a)-X(t,b)}[sort];
- const row=i=>{const on=G||t.sel[i.id];return `<li class="row${on?' on':''}${on&&!G?(P(t,i)=='b'?' pb':' pp'):''}" data-id="${i.id}"><label${G?' data-a="edit"':''}>${G?'':`<input type="checkbox" data-a="sel"${on?' checked':''}>`}<span>${esc(i.n)}${G&&i.pr?`<small>Kaufpreis ${nf(i.pr)} €${(i.q||1)>1?' je Stück':''}</small>`:''}${G&&(i.q||1)>1?`<em class="tag">× ${i.q}</em>`:''}${i.x?'<em class="tag">nur Tour</em>':''}${i.k?`<small>${esc(i.k)}</small>`:''}${F(t,i)?(on&&!G?`<small><button class="fl${i.id in t.of?' mod':''}" data-a="fl">${t.em[i.id]?'leer':'voll'}: + ${F(t,i)} g ${i.t=='w'?'Wasser':'Verbrauch'}</button></small>`:`<small>+ ${F(t,i)} g bei voll</small>`):''}</span></label>${on&&!G&&(i.q||1)>1?`<span class="qt"><button data-a="qm" aria-label="weniger">−</button><b>${N(t,i)}</b><button data-a="qp" aria-label="mehr">+</button></span>`:''}${on&&!G?`<button class="pl ${P(t,i)}" data-a="pl" title="Wechseln zwischen am Körper und im Rucksack">${P(t,i)=='b'?'am Körper':'Rucksack'}</button>`:''}<button class="w${i.id in t.ov?' mod':''}" data-a="edit" title="Bearbeiten">${W(t,i)*N(t,i)} g${N(t,i)>1&&on&&!G?`<small>je ${W(t,i)} g</small>`:''}</button></li>`};
+ const row=i=>{const on=G||t.sel[i.id];return `<li class="row${on?' on':''}${on&&!G?(P(t,i)=='b'?' pb':' pp'):''}" data-id="${i.id}"><label${G?' data-a="edit"':''}>${G?'':`<input type="checkbox" data-a="sel"${on?' checked':''}>`}<span>${esc(cmp?i.n:dn(i))}${G&&i.pr?`<small>Kaufpreis ${nf(i.pr)} €${(i.q||1)>1?' je Stück':''}</small>`:''}${G&&(i.q||1)>1?`<em class="tag">× ${i.q}</em>`:''}${i.x?'<em class="tag">nur Tour</em>':''}${i.k?`<small>${esc(i.k)}</small>`:''}${F(t,i)?(on&&!G?`<small><button class="fl${i.id in t.of?' mod':''}" data-a="fl">${t.em[i.id]?'leer':'voll'}: + ${F(t,i)} g ${i.t=='w'?'Wasser':'Verbrauch'}</button></small>`:`<small>+ ${F(t,i)} g bei voll</small>`):''}</span></label>${on&&!G&&(i.q||1)>1?`<span class="qt"><button data-a="qm" aria-label="weniger">−</button><b>${N(t,i)}</b><button data-a="qp" aria-label="mehr">+</button></span>`:''}${on&&!G?`<button class="pl ${P(t,i)}" data-a="pl" title="Wechseln zwischen am Körper und im Rucksack">${P(t,i)=='b'?'am Körper':'Rucksack'}</button>`:''}<button class="w${i.id in t.ov?' mod':''}" data-a="edit" title="Bearbeiten">${W(t,i)*N(t,i)} g${N(t,i)>1&&on&&!G?`<small>je ${W(t,i)} g</small>`:''}</button></li>`};
  let h=G?'':vbarHtml(t);
  for(const c of [...new Set(items.map(i=>i.c).concat(G?S.cats.map(x=>x.c):[]))]){
   let ci=list.filter(i=>i.c==c);if(!ci.length&&!(G&&!q))continue;
@@ -271,7 +313,7 @@ function render(){
   const sl=ci.filter(i=>G||t.sel[i.id]),open=q||!closed.has(c);
   h+=`<section class="cat"><h2 data-a="fold" data-c="${esc(c)}"><span class="car">${open?'▾':'▸'}</span>${esc(c)}${G?`<button class="mini" data-a="rc" data-c="${esc(c)}" title="Kategorie umbenennen" aria-label="Kategorie umbenennen">✎</button><button class="mini" data-a="ai" data-c="${esc(c)}" title="Gegenstand in dieser Kategorie hinzufügen" aria-label="Gegenstand hinzufügen">＋</button>`:''}<small>${G?ci.length+' Teile':sl.length+' von '+ci.length+' gewählt'+bkh(t,sl)}</small></h2>`;
   if(open){let ls='',s=null;
-   for(const i of ci){if(!cmp&&i.s!==s){if(ls)ls+='</ul>';s=i.s;ls+=(s?`<h3>${esc(s)}${G?`<button class="mini" data-a="rs" data-c="${esc(c)}" data-s="${esc(s)}" aria-label="Unterkategorie umbenennen">✎</button>`:''}</h3>`:'')+'<ul>'}else if(!ls)ls='<ul>';ls+=row(i)}
+   let ar=null;for(const i of ci){if(!cmp&&(i.s!==s||(i.a||'')!==ar)){if(ls)ls+='</ul>';if(i.s!==s){s=i.s;ls+=s?`<h3>${esc(s)}${G?`<button class="mini" data-a="rs" data-c="${esc(c)}" data-s="${esc(s)}" aria-label="Unterkategorie umbenennen">✎</button>`:''}</h3>`:''}ar=i.a||'';ls+=(ar?`<h4>${esc(ar)}${G?`<button class="mini" data-a="ra" data-c="${esc(c)}" data-s="${esc(s)}" data-ar="${esc(ar)}" aria-label="Art umbenennen">✎</button>`:''}</h4>`:'')+'<ul>'}else if(!ls)ls='<ul>';ls+=row(i)}
    if(ls)h+=ls+'</ul>'}
   h+='</section>'}
  $('#list').innerHTML=h||(!S.items.length&&!q?'<p>Noch keine Daten auf diesem Gerät. Richte oben die Synchronisation ein oder lade unten unter „Datensicherung“ eine Sicherung.</p>':'<p>Nichts gefunden. Suche anpassen oder einen Gegenstand hinzufügen.</p>');
@@ -282,7 +324,7 @@ function render(){
  for(const c of [...new Set(items.map(i=>i.c))]){
   const ci=grp(items.filter(i=>i.c==c&&t.sel[i.id]));if(!ci.length)continue;
   r+=`<section><h2>${esc(c)}</h2><ul>`;let s=null;
-  for(const i of ci){if(i.s!==s){s=i.s;if(s)r+=`</ul><h3>${esc(s)}</h3><ul>`}
+  let ar=null;for(const i of ci){if(i.s!==s||(i.a||'')!==ar){if(i.s!==s){s=i.s;if(s)r+=`</ul><h3>${esc(s)}</h3><ul>`}ar=i.a||'';if(ar)r+=`</ul><h4>${esc(ar)}</h4><ul>`}
    r+=`<li><span class="bx"></span><span>${N(t,i)>1?N(t,i)+'× ':''}${esc(i.n)}${P(t,i)=='b'?' <i>(am Körper)</i>':''}</span><span class="g">${W(t,i)*N(t,i)} g${F(t,i)&&!t.em[i.id]?' + '+F(t,i)*N(t,i):''}</span></li>`}
   r+='</ul></section>'}
  $('#pr').innerHTML=r}
@@ -291,21 +333,21 @@ function render(){
 function dlg(id,pre){
  const t=cur(),it=id?all(t).find(i=>i.id==id):null;ed=it;
  $('#dt').textContent=it?'Gegenstand bearbeiten':'Neuer Gegenstand';
- $('#fn').value=it?it.n:'';$('#fc').value=it?it.c:'';$('#fs').value=it?it.s:'';$('#fg').value=it?W(t,it):'';$('#ff').value=it?(F(t,it)||''):'';$('#ft').value=(it&&it.t)||'v';$('#fq').value=it?(it.q||1):1;$('#fpz').value=it&&it.pr?it.pr:'';
- const u=k=>[...new Set(all(t).map(i=>i[k]).concat(S.cats.map(x=>x[k])).filter(Boolean))].map(v=>`<option value="${esc(v)}">`).join('');
- $('#cl').innerHTML=u('c');$('#sl').innerHTML=u('s');
+ {const sp=it?(it.nf?it:sugg(it)):{a:'',h:'',m:'',z:''};$('#fa').value=sp.a||'';$('#fh').value=sp.h||'';$('#fn').value=sp.m||'';$('#fz').value=sp.z||'';$('#fold').textContent=it&&!it.nf?'Bisher: „'+it.n+'“. Die Felder sind ein Vorschlag, beim Speichern wird umgestellt.':''}$('#fc').value=it?it.c:'';$('#fs').value=it?it.s:'';$('#fg').value=it?W(t,it):'';$('#ff').value=it?(F(t,it)||''):'';$('#ft').value=(it&&it.t)||'v';$('#fq').value=it?(it.q||1):1;$('#fpz').value=it&&it.pr?it.pr:'';
+ 
+ 
  const b=page=='gear'?(it?[['saveG','Speichern'],['delG','Löschen']]:[['addG','Speichern']])
   :!it?[['addT','Nur für diese Tour'],['addG','In Gesamtliste speichern']]
   :it.x?[['saveX','Speichern'],['promo','In Gesamtliste übernehmen'],['delX','Aus Tour entfernen']]
   :[['ovT','Gewicht nur für diese Tour'],['saveG','Global speichern (alle Touren)'],...((id in t.ov||id in t.of)?[['rst','Tour-Gewicht zurücksetzen']]:[]),['delG','Aus Gesamtliste löschen']];
  $('#acts').innerHTML=b.map(([a,l])=>`<button type="button" data-d="${a}">${l}</button>`).join('')+'<button type="button" class="ghost" data-d="x">Abbrechen</button>';
- if(pre)$('#fc').value=pre;$('#dlg').showModal();$('#fn').focus();
+ if(pre)$('#fc').value=pre;dls();$('#dlg').showModal();$('#'+(it?'fn':'fc')).focus();
 }
 $('#acts').onclick=async e=>{
  const a=e.target.dataset.d;if(!a)return;
  if(a=='x')return $('#dlg').close();
- const t=cur(),id=ed&&ed.id,v={n:$('#fn').value.trim(),c:$('#fc').value.trim()||'Sonstiges',s:$('#fs').value.trim(),g:Math.max(0,Math.round(+$('#fg').value||0)),f:Math.max(0,Math.round(+$('#ff').value||0)),t:$('#ft').value,q:Math.max(1,Math.round(+$('#fq').value||1)),pr:Math.max(0,Math.round((+$('#fpz').value||0)*100)/100)};
- if(!['delG','delX','rst'].includes(a)&&!v.n)return $('#fn').focus();
+ const t=cur(),id=ed&&ed.id,v={a:$('#fa').value.trim(),h:$('#fh').value.trim(),m:$('#fn').value.trim(),z:$('#fz').value.trim(),nf:1,c:$('#fc').value.trim()||'Sonstiges',s:$('#fs').value.trim(),g:Math.max(0,Math.round(+$('#fg').value||0)),f:Math.max(0,Math.round(+$('#ff').value||0)),t:$('#ft').value,q:Math.max(1,Math.round(+$('#fq').value||1)),pr:Math.max(0,Math.round((+$('#fpz').value||0)*100)/100)};
+ v.n=nmk(v);if(!['delG','delX','rst'].includes(a)&&!v.n)return $('#fn').focus();
  if(a=='addT'){const x={id:uid(),...v};t.ex.push(x);t.sel[x.id]=1}
  else if(a=='addG'){const x={id:uid(),...v,b:0};S.items.push(x);t.sel[x.id]=1}
  else if(a=='saveX')Object.assign(t.ex.find(i=>i.id==id),v);
@@ -328,6 +370,7 @@ $('#list').onclick=e=>{
  else if(a=='qm'||a=='qp'){const i=all(t).find(x=>x.id==id),c=N(t,i);t.qt[id]=a=='qm'?Math.max(1,c-1):Math.min(i.q||1,c+1)}
  else if(a=='rc')return ren('c',el.dataset.c);
  else if(a=='rs')return ren('s',el.dataset.c,el.dataset.s);
+ else if(a=='ra')return rena(el.dataset.c,el.dataset.s,el.dataset.ar);
  else if(a=='ai')return dlg(null,el.dataset.c);
  else if(a=='ae')return xdlg();
  else if(a=='ee')return xdlg(id);
@@ -529,6 +572,12 @@ $('#wb').onclick=e=>{const a=e.target.dataset.wb;if(a=='csv')wexp();else if(a=='
 $('#ver').textContent=VER;$('#undo').onclick=undo;ubt();
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key=='z'&&!/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)){e.preventDefault();undo()}});
 $('#addc').onclick=async()=>{const n=await ask('Name der neuen Kategorie?','');if(n){S.cats.push({c:n,s:''});save();render()}};
+$('#asst').onclick=aopen;
+$('#fc').oninput=dls;$('#fs').oninput=dls;
+$('#abody').oninput=$('#abody').onchange=e=>{const d=e.target.dataset;if(!d.ai||!ASG[d.ai])return;ASG[d.ai][d.k]=d.k=='on'?(e.target.checked?1:0):e.target.value.trim()};
+$('#abt').onclick=async e=>{const a=e.target.dataset.ab;if(!a)return;if(a=='x')return $('#adlg').close();
+ let n=0;for(const i of S.items){const p=ASG[i.id];if(!p||!p.on)continue;const v={a:p.a,h:p.h,m:p.m,z:p.z};if(!nmk(v))continue;Object.assign(i,v,{nf:1});i.n=nmk(i);n++}
+ $('#adlg').close();save();render();await ask(n+' Gegenstände umgestellt. Mit „Zurück“ machst du das rückgängig.')};
 // ===== Varianten =====
 const VF=['sel','pl','qt','ov','of','em','food'];
 const cl=x=>JSON.parse(JSON.stringify(x??null));
