@@ -234,7 +234,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.24';
+const K='packliste.v1';const VER='v0.25';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -600,7 +600,7 @@ function gpxParse(x){const pts=[];const re=/<(trkpt|rtept)\b([^>]*)>([\s\S]*?)<\
  for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i],dl=(b.la-a.la)*rad,dn=(b.lo-a.lo)*rad,h=Math.sin(dl/2)**2+Math.cos(a.la*rad)*Math.cos(b.la*rad)*Math.sin(dn/2)**2,d=2*R*Math.asin(Math.min(1,Math.sqrt(h)));dist+=d;
   const dt=(b.t-a.t)/1000;if(dt>0&&dt<600&&d/dt>0.3)mov+=dt}
  const el=pts.map(p=>p.e).filter(v=>v!==null&&isFinite(v));let up=0;
- if(el.length>1){const w=5,sm=el.map((_,i)=>{let s=0,n=0;for(let j=Math.max(0,i-w);j<=Math.min(el.length-1,i+w);j++){s+=el[j];n++}return s/n});let ref=sm[0];for(const v of sm){if(v-ref>=3){up+=v-ref;ref=v}else if(v<ref)ref=v}}
+ if(el.length>1){const w=2,sm=el.map((_,i)=>{let s=0,n=0;for(let j=Math.max(0,i-w);j<=Math.min(el.length-1,i+w);j++){s+=el[j];n++}return s/n});let ref=sm[0];for(const v of sm){if(v-ref>=1){up+=v-ref;ref=v}else if(v<ref)ref=v}}
  const ts=pts.map(p=>p.t).filter(isFinite),t0=ts.length?new Date(Math.min(...ts)):null,t1=ts.length?new Date(Math.max(...ts)):null,hh=d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
  const nm=((x.match(/<trk>[\s\S]*?<name>([\s\S]*?)<\/name>/)||x.match(/<metadata>[\s\S]*?<name>([\s\S]*?)<\/name>/)||[])[1]||'').replace(/<!\[CDATA\[|\]\]>/g,'').trim();
  return{km:Math.round(dist/100)/10,hm:Math.round(up),mov:Math.round(mov),d:t0?ymd(t0):'',t0:t0?hh(t0):'',t1:t1?hh(t1):'',name:nm,n:pts.length}}
