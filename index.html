@@ -153,6 +153,19 @@ dialog .ck input{width:auto;display:inline;margin:0 8px 0 0}
 .xt tfoot td{font-weight:700;border-top:2px solid var(--ink)}
 .xt tr.tdy td{background:rgba(242,183,5,.14)}
 .xt td small{display:block;font-size:.75rem;color:var(--mut);white-space:normal}
+.xk{display:flex;justify-content:space-between;gap:8px;margin-bottom:12px}
+.xk>div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;flex:1;max-width:48%}
+.xk .r{text-align:right}
+.xk b{display:block;font:700 1.5rem Georgia,serif;font-variant-numeric:tabular-nums}
+.xk span{font-size:.85rem;color:var(--mut)}
+.xcat{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px}
+.xcl{flex:1 1 220px}
+.xci{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.xci:first-child{border-top:0}
+.xci .n{flex:1}
+.xci b{font-variant-numeric:tabular-nums}
+.xci .p{min-width:3.2em;text-align:right;color:var(--mut);font-size:.85rem}
+.xpie{width:min(180px,45vw);flex:0 0 auto;margin:0 auto}
 .xr{flex:1;text-align:left;border:0;background:transparent;padding:0;min-width:0}
 .row b{font-variant-numeric:tabular-nums;white-space:nowrap}
 dialog{border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);width:min(420px,94vw);padding:16px}
@@ -237,7 +250,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.26';
+const K='packliste.v1';const VER='v0.27';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -453,7 +466,11 @@ function expHtml(t){const{ax,days,tot,sum}=agg(t),m=v=>nf(v)+' '+esc(t.cur),ds=d
  let h=`<div class="xtb"><button data-a="ae">Ausgabe hinzufügen</button><button data-a="xe">Export (CSV)</button><button data-a="cu">Währung: ${esc(t.cur)}</button></div>`;
  if(!TD.length)h+=`<p class="hint" style="padding:0 0 10px">Tipp: Lege im Reiter „Planung“ den Zeitraum und An- und Abreise an, dann stehen hier alle Tourtage zur Auswahl.</p>`;
  if(!ax.length&&!TD.length)return h+'<p>Noch keine Ausgaben für diese Tour.</p>';
- if(ax.length)h+=`<div class="xs"><div><b>${m(sum)}</b><span>Gesamt</span></div>${CATS.map(c=>`<div><b>${m(tot[c])}</b><span>${c}</span></div>`).join('')}<div><b>${m(nd?sum/nd:0)}</b><span>Ø pro Tag (${nd} Tage)</span></div></div>`;
+ if(ax.length){const XC=['#2F6B5A','#F2B705','#5A7FA8','#C4572F'],on=CATS.map((c,i)=>({c,v:tot[c],col:XC[i]})).filter(x=>x.v>0);let a0=-Math.PI/2,pie='';
+  if(on.length==1)pie=`<circle cx="100" cy="100" r="90" fill="${on[0].col}"/>`;else for(const s of on){const a1=a0+s.v/sum*2*Math.PI,x=a=>(100+90*Math.cos(a)).toFixed(2),y=a=>(100+90*Math.sin(a)).toFixed(2);pie+=`<path d="M100 100L${x(a0)} ${y(a0)}A90 90 0 ${a1-a0>Math.PI?1:0} 1 ${x(a1)} ${y(a1)}Z" fill="${s.col}" stroke="var(--card)" stroke-width="1.5"><title>${s.c}: ${m(s.v)}</title></path>`;a0=a1}
+  pie+=`<circle cx="100" cy="100" r="50" fill="var(--card)"/>`;
+  h+=`<div class="xk"><div><b>${m(sum)}</b><span>Gesamt</span></div><div class="r"><b>${m(nd?sum/nd:0)}</b><span>Ø pro Tag (${nd} Tage)</span></div></div>`;
+  h+=`<section class="cat xcat"><div class="xcl">${CATS.map((c,i)=>`<div class="xci"><span class="sw" style="background:${XC[i]}"></span><span class="n">${c}</span><b>${m(tot[c])}</b><span class="p">${sum?Math.round(tot[c]/sum*100):0} %</span></div>`).join('')}</div><svg class="xpie" viewBox="0 0 200 200" role="img" aria-label="Ausgaben nach Kategorie">${pie}</svg></section>`}
  h+=`<section class="cat"><h2>Pro Tag<small>in ${esc(t.cur)}</small></h2><div class="xw"><table class="xt"><thead><tr><th>Tag</th>${CATS.map(c=>`<th>${c}</th>`).join('')}<th>Summe</th><th></th></tr></thead><tbody>${rows.map(r=>`<tr${r.d==today?' class="tdy"':''}><td>${esc(r.l)}<small>${fd(r.d)}${r.d==today?' · heute':''}${r.s?' · '+esc(r.s):''}</small></td>${CATS.map(c=>`<td>${(days[r.d]||{})[c]?nf(days[r.d][c]):'–'}</td>`).join('')}<td><b>${days[r.d]?nf(ds(r.d)):'–'}</b></td><td><button class="mini" data-a="aed" data-d="${r.d}" title="Ausgabe für diesen Tag" aria-label="Ausgabe für ${esc(r.l)} hinzufügen">+</button></td></tr>`).join('')}</tbody><tfoot><tr><td>Gesamt</td>${CATS.map(c=>`<td>${nf(tot[c])}</td>`).join('')}<td>${nf(sum)}</td><td></td></tr></tfoot></table></div></section>`;
  if(ax.length)h+=`<section class="cat"><h2>Einzelbuchungen</h2><ul>${ax.map(e=>`<li class="row" data-id="${e.id}"><button class="xr" data-a="ee">${esc(e.n||e.c)}<small>${esc(dlab(t,e.d))}, ${e.c}</small></button><b>${m(e.a)}</b></li>`).join('')}</ul></section>`;
  return h}
