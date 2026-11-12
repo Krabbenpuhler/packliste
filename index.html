@@ -10,10 +10,10 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Packliste">
 <style>
-:root{--bg:#F2F4F1;--ink:#15302B;--mut:#5C706A;--line:#D3DBD6;--card:#fff;--sp:#17332E;--ac:#F2B705;--ck:#17332E;color-scheme:light dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#F2F4F1;--ink:#15302B;--mut:#5C706A;--line:#D3DBD6;--card:#fff;--sp:#17332E;--ac:#F2B705;--ck:#17332E;color-scheme:light dark;--c1:#2a78d6;--c2:#eb6834;--c3:#1baf7a;--c4:#e87ba4;--c5:#008300;--c6:#6250d6;--c7:#e34948;--c8:#eda100;--cx:#9AA5A0;--cn:#7d8a85;--nv:#8c918e;--nw:#4f7a9c;--ne:#9c7a4f;--nb:#4a4f4c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1917;--ink:#E5EDEA;--mut:#97ABA5;--line:#2A3A35;--card:#16231F;--sp:#0B1412;--ck:#F2B705}}
-:root[data-theme="dark"]{--bg:#0F1917;--ink:#E5EDEA;--mut:#97ABA5;--line:#2A3A35;--card:#16231F;--sp:#0B1412;--ck:#F2B705}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#d55181;--c5:#008300;--c6:#9085e9;--c7:#e66767;--c8:#c98500;--cx:#6b7671;--cn:#8fa09a;--nv:#a3aaa6;--nw:#7fa6c4;--ne:#c4a37f;--nb:#d0d5d2;--bg:#0F1917;--ink:#E5EDEA;--mut:#97ABA5;--line:#2A3A35;--card:#16231F;--sp:#0B1412;--ck:#F2B705}}
+:root[data-theme="dark"]{--c1:#3987e5;--c2:#d95926;--c3:#199e70;--c4:#d55181;--c5:#008300;--c6:#9085e9;--c7:#e66767;--c8:#c98500;--cx:#6b7671;--cn:#8fa09a;--nv:#a3aaa6;--nw:#7fa6c4;--ne:#c4a37f;--nb:#d0d5d2;--bg:#0F1917;--ink:#E5EDEA;--mut:#97ABA5;--line:#2A3A35;--card:#16231F;--sp:#0B1412;--ck:#F2B705}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,"Segoe UI",sans-serif}
 button,select,input{font:inherit;color:inherit}
@@ -115,6 +115,12 @@ header h1 small{font:400 .8rem system-ui;opacity:.7}
 #wdlg{width:min(640px,96vw);max-height:90vh;overflow:auto}
 .wpie{display:block;width:min(260px,70vw);margin:0 auto 8px}
 .sw{display:inline-block;width:.9em;height:.9em;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.wr td:first-child{display:flex;align-items:flex-start;gap:2px}
+.wr .ck{padding:2px 0}
+.wt{border:0;background:transparent;padding:2px 0;text-align:left;color:var(--ink)}
+.wt small{display:block;font-size:.75rem;color:var(--mut)}
+.wi td{font-size:.82rem;color:var(--mut);border-top:0;padding-top:1px;padding-bottom:1px}
+.wi td:first-child{padding-left:48px;white-space:normal}
 #wb{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 #vb{display:flex;justify-content:flex-end;margin-top:12px}
 #vdlg{width:min(640px,96vw);max-height:90vh;overflow:auto}
@@ -262,7 +268,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.29';
+const K='packliste.v1';const VER='v0.30';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -618,20 +624,27 @@ $('#list').onchange=e=>{const el=e.target,t=T(),v=el.type=='checkbox'?(el.checke
  const quiet=el.tagName=='TEXTAREA'||(el.tagName=='INPUT'&&!['number','checkbox'].includes(el.type));
  save();if(!quiet)render()};
 document.querySelectorAll('#sub button').forEach(b=>b.onclick=()=>{view=b.dataset.v;S.view=view;save();render()});
-const WC=['#17332E','#2F6B5A','#6FA287','#B7D3A8','#F2B705','#D98E04','#C4572F','#8C3B2A','#5A7FA8','#2E4E73','#8E6BA8','#9AA5A0','#5C706A','#C9A66B'];
-let wOff=new Set(['b']);
-function wsegs(t){const m=new Map();let vb=0,wa=0,bd=0;
- for(const i of all(t))if(t.sel[i.id]&&!MB(t,i)){const k=N(t,i),w=W(t,i)*k,f=(t.em[i.id]?0:F(t,i))*k;
-  if(P(t,i)=='b')bd+=w+f;else{m.set(i.c,(m.get(i.c)||0)+w);if(i.t=='w')wa+=f;else vb+=f}}
- const o=[...m].map(([n,g])=>({id:'c:'+n,n,g})).sort((a,b)=>b.g-a.g);
- o.push({id:'v',n:'Verbrauch',g:vb},{id:'w',n:'Wasser',g:wa},{id:'e',n:'Essen',g:t.food||0},{id:'b',n:'Am Körper',g:bd});
+const WCN=8,WEX={v:'Verbrauch',w:'Wasser',e:'Essen',b:'Am Körper'};
+let wOff=new Set(['b']),wOpen=new Set();
+const catOrder=t=>[...new Set(S.items.map(i=>i.c).concat(S.cats.map(x=>x.c),t.ex.map(i=>i.c)))];
+const wcol=(t,s)=>{if(s.id.startsWith('c:')){const k=catOrder(t).indexOf(s.n);return k>=0&&k<WCN?`var(--c${k+1})`:'var(--cx)'}return`url(#wp-${s.id})`};
+const wsw=(t,s)=>s.id.startsWith('c:')?`background:${wcol(t,s)}`:`background:repeating-linear-gradient(${s.id=='b'?45:135}deg,var(--n${s.id}) 0 3px,var(--card) 3px 5px);outline:1px solid var(--n${s.id})`;
+function wsegs(t){const m=new Map(),it=new Map();let vb=0,wa=0,bd=0;const vi=[],wi=[],bi=[];
+ for(const i of all(t))if(t.sel[i.id]&&!MB(t,i)){const k=N(t,i),w=W(t,i)*k,f=(t.em[i.id]?0:F(t,i))*k,nm=(k>1?k+'× ':'')+dn(i);
+  if(P(t,i)=='b'){bd+=w+f;bi.push([nm,w+f])}else{m.set(i.c,(m.get(i.c)||0)+w);if(!it.has(i.c))it.set(i.c,[]);it.get(i.c).push([nm+(f?' (leer)':''),w]);if(f){if(i.t=='w'){wa+=f;wi.push([nm,f])}else{vb+=f;vi.push([nm,f])}}}}
+ const o=[...m].map(([n,g])=>({id:'c:'+n,n,g,it:it.get(n)})).sort((a,b)=>b.g-a.g);
+ o.push({id:'v',n:'Verbrauch',g:vb,it:vi,h:'Inhalt von Gaskartusche & Co.'},{id:'w',n:'Wasser',g:wa,it:wi,h:'Inhalt der Flaschen'},{id:'e',n:'Essen',g:t.food||0,it:[],h:'aus der Essensplanung bzw. von Hand'},{id:'b',n:'Am Körper',g:bd,it:bi,h:'getragen, nicht im Rucksack'});
  return o.filter(x=>x.g>0)}
 function wrender(){const t=T(),sg=wsegs(t),on=sg.filter(s=>!wOff.has(s.id)),sum=on.reduce((a,s)=>a+s.g,0);let a0=-Math.PI/2,pie='';
- if(sum>0){if(on.length==1)pie=`<circle cx="100" cy="100" r="90" fill="${WC[sg.indexOf(on[0])%WC.length]}"><title>${esc(on[0].n)}</title></circle>`;
-  else for(const s of on){const a1=a0+s.g/sum*2*Math.PI,x=a=>(100+90*Math.cos(a)).toFixed(2),y=a=>(100+90*Math.sin(a)).toFixed(2);pie+=`<path d="M100 100L${x(a0)} ${y(a0)}A90 90 0 ${a1-a0>Math.PI?1:0} 1 ${x(a1)} ${y(a1)}Z" fill="${WC[sg.indexOf(s)%WC.length]}" stroke="var(--card)" stroke-width="1.5"><title>${esc(s.n)}: ${fmt(s.g)}</title></path>`;a0=a1}
-  pie+=`<circle cx="100" cy="100" r="46" fill="var(--card)"/><text x="100" y="98" text-anchor="middle" style="fill:var(--ink);font:700 15px Georgia,serif">${fmt(sum)}</text><text x="100" y="114" text-anchor="middle" style="fill:var(--mut);font:11px system-ui">gewählt</text>`}
- $('#wbody').innerHTML=`<svg class="wpie" viewBox="0 0 200 200" role="img" aria-label="Tortendiagramm der Gewichte">${pie}</svg><table class="xt"><tbody>${sg.map((s,i)=>{const o=!wOff.has(s.id);return`<tr><td><label class="ck"><input type="checkbox" data-w="${esc(s.id)}"${o?' checked':''}><span class="sw" style="background:${WC[i%WC.length]}"></span>${esc(s.n)}</label></td><td>${fmt(s.g)}</td><td>${o&&sum?Math.round(s.g/sum*100)+' %':'–'}</td></tr>`}).join('')}</tbody><tfoot><tr><td>Summe der gewählten</td><td>${fmt(sum)}</td><td></td></tr></tfoot></table>`}
+ const defs=`<defs>${Object.keys(WEX).map(k=>`<pattern id="wp-${k}" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(${k=='b'?45:135})"><rect width="6" height="6" style="fill:var(--card)"/><rect width="3.5" height="6" style="fill:var(--n${k})"/></pattern>`).join('')}</defs>`;
+ if(sum>0){if(on.length==1)pie=`<circle cx="100" cy="100" r="90" style="fill:${wcol(t,on[0])}"><title>${esc(on[0].n)}</title></circle>`;
+  else for(const s of on){const a1=a0+s.g/sum*2*Math.PI,x=a=>(100+90*Math.cos(a)).toFixed(2),y=a=>(100+90*Math.sin(a)).toFixed(2);pie+=`<path d="M100 100L${x(a0)} ${y(a0)}A90 90 0 ${a1-a0>Math.PI?1:0} 1 ${x(a1)} ${y(a1)}Z" style="fill:${wcol(t,s)};stroke:var(--card);stroke-width:2"><title>${esc(s.n)}: ${fmt(s.g)}</title></path>`;a0=a1}
+  pie+=`<circle cx="100" cy="100" r="46" style="fill:var(--card)"/><text x="100" y="98" text-anchor="middle" style="fill:var(--ink);font:700 15px Georgia,serif">${fmt(sum)}</text><text x="100" y="114" text-anchor="middle" style="fill:var(--mut);font:11px system-ui">gewählt</text>`}
+ const row=s=>{const o=!wOff.has(s.id),op=wOpen.has(s.id),L=(s.it||[]).slice().sort((a,b)=>b[1]-a[1]);
+  return`<tr class="wr"><td><label class="ck"><input type="checkbox" data-w="${esc(s.id)}"${o?' checked':''} aria-label="${esc(s.n)} einrechnen"><span class="sw" style="${wsw(t,s)}"></span></label><button class="wt" data-wo="${esc(s.id)}" aria-expanded="${op}">${op?'▾':'▸'} ${esc(s.n)}${s.h?`<small>${esc(s.h)}</small>`:''}</button></td><td>${fmt(s.g)}</td><td>${o&&sum?Math.round(s.g/sum*100)+' %':'–'}</td></tr>${op?L.map(([n,g])=>`<tr class="wi"><td>${esc(n)}</td><td>${fmt(g)}</td><td></td></tr>`).join('')||'<tr class="wi"><td>keine Einzelteile</td><td></td><td></td></tr>':''}`};
+ $('#wbody').innerHTML=`<svg class="wpie" viewBox="0 0 200 200" role="img" aria-label="Tortendiagramm der Gewichte">${defs}${pie}</svg><p class="hint" style="padding:0 0 6px">Kategorien zeigen das Leergewicht im Rucksack. Inhalt (Verbrauch, Wasser), Essen und Getragenes stehen gestreift darunter. Tippe auf einen Namen für die Einzelteile.</p><table class="xt"><tbody>${sg.map(row).join('')}</tbody><tfoot><tr><td>Summe der gewählten</td><td>${fmt(sum)}</td><td></td></tr></tfoot></table>`}
 function wopen(){wrender();$('#wdlg').showModal()}
+$('#wbody').onclick=e=>{const b=e.target.closest('[data-wo]');if(!b)return;const id=b.dataset.wo;wOpen.has(id)?wOpen.delete(id):wOpen.add(id);wrender()};
 $('#wbody').onchange=e=>{const id=e.target.dataset.w;if(!id)return;wOff.has(id)?wOff.delete(id):wOff.add(id);wrender()};
 $('#wb').onclick=e=>{const a=e.target.dataset.wb;if(a=='csv')wexp();else if(a=='x')$('#wdlg').close()};
 $('#ver').textContent=VER;$('#undo').onclick=undo;ubt();
