@@ -196,6 +196,13 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
  #pr .bx{width:3.2mm;height:3.2mm;border:1px solid #000;flex:none}
  #pr .g{margin-left:auto;color:#333;white-space:nowrap}
  #pr i{font-size:8pt;color:#333}
+ #pr .wo{column-span:all;break-inside:avoid;margin-top:10px}
+ #pr table{border-collapse:collapse;width:100%;font-size:9pt;margin:4px 0 8px;font-variant-numeric:tabular-nums}
+ #pr th,#pr td{border-bottom:1px solid #bbb;padding:2px 6px;text-align:right}
+ #pr th:first-child,#pr td:first-child{text-align:left}
+ #pr th{border-bottom:1px solid #000}
+ #pr table.sum{width:60%}
+ #pr table.sum tr.t td{font-weight:700;border-top:1px solid #000}
 }
 </style></head><body>
 <div id="app">
@@ -255,7 +262,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.28';
+const K='packliste.v1';const VER='v0.29';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -348,13 +355,18 @@ function render(){
  const fd=G?0:(t.food||0);let bs=0,vb=0,wa=0,bd=0,n=0,mbw=0,mbn=0;
  for(const i of items)if(t.sel[i.id]){const k=N(t,i);if(MB(t,i)){mbw+=X(t,i)*k;mbn+=k;continue}n+=k;const f=(t.em[i.id]?0:F(t,i))*k,w=W(t,i)*k;if(P(t,i)=='b')bd+=w+f;else{bs+=w;if(i.t=='w')wa+=f;else vb+=f}}
  $('#tot').innerHTML=G?'':`<div class="fr"><div><b>${fmt(bs)}</b><span>Basis</span></div><div><b>${fmt(vb)}</b><span>+ Verbrauch</span></div><div><b>${fmt(wa)}</b><span>+ Wasser</span></div><button class="fd" data-a="food" title="Essen eintragen"><b>${fmt(fd)}</b><span>+ Essen</span></button><div class="sm"><b>${fmt(bs+vb+wa+fd)}</b><span>= Rucksack</span></div></div><div class="fn">Am Körper ${fmt(bd)}, ${n} Teile gewählt${mbn?`, vielleicht +${fmt(mbw)} (${mbn} Teil${mbn>1?'e':''})`:''}, tippe für Details</div>`;
- if(!G){let r=`<h1>${esc(t.name+vName(t))}</h1><p>Basis ${fmt(bs)}, Verbrauch ${fmt(vb)}, Wasser ${fmt(wa)}, Essen ${fmt(fd)}, Rucksack gesamt ${fmt(bs+vb+wa+fd)}, am Körper ${fmt(bd)}</p>`;
+ if(!G){let r=`<h1>${esc(t.name+vName(t))}</h1><p>Rucksack ${fmt(bs+vb+wa+fd)} (Basis ${fmt(bs)}), am Körper ${fmt(bd)}${mbn?`, vielleicht +${fmt(mbw)}`:''}. Übersicht am Ende.</p>`;
  for(const c of [...new Set(items.map(i=>i.c))]){
   const ci=grp(items.filter(i=>i.c==c&&t.sel[i.id]));if(!ci.length)continue;
   r+=`<section><h2>${esc(c)}</h2><ul>`;let s=null;
   let ar=null;for(const i of ci){if(i.s!==s||(i.a||'')!==ar){if(i.s!==s){s=i.s;if(s)r+=`</ul><h3>${esc(s)}</h3><ul>`}ar=i.a||'';if(ar)r+=`</ul><h4>${esc(ar)}</h4><ul>`}
    r+=`<li><span class="bx"></span><span>${N(t,i)>1?N(t,i)+'× ':''}${esc(i.n)}${P(t,i)=='b'?' <i>(am Körper)</i>':''}${MB(t,i)?' <i>(vielleicht)</i>':''}</span><span class="g">${W(t,i)*N(t,i)} g${F(t,i)&&!t.em[i.id]?' + '+F(t,i)*N(t,i):''}</span></li>`}
   r+='</ul></section>'}
+ {const cats=[...new Set(items.filter(i=>t.sel[i.id]).map(i=>i.c))],cg=c=>{let b=0,p=0,x=0,m=0;for(const i of items)if(i.c==c&&t.sel[i.id]){const k=N(t,i),w=W(t,i)*k,f=(t.em[i.id]?0:F(t,i))*k;if(MB(t,i)){m+=w+f;continue}if(P(t,i)=='b')b+=w+f;else{p+=w;x+=f}}return{b,p,x,m}};
+  let mr=0;for(const i of items)if(t.sel[i.id]&&MB(t,i)&&P(t,i)!='b')mr+=X(t,i)*N(t,i);
+  const g=v=>v?fmt(v):'–',rs=bs+vb+wa+fd;
+  r+=`<section class="wo"><h2>Gewichtsübersicht</h2><table><thead><tr><th>Kategorie</th><th>Am Körper</th><th>Rucksack</th><th>Verbrauch/Wasser</th><th>Gesamt</th>${mbn?'<th>Vielleicht</th>':''}</tr></thead><tbody>${cats.map(c=>{const x=cg(c);return`<tr><td>${esc(c)}</td><td>${g(x.b)}</td><td>${g(x.p)}</td><td>${g(x.x)}</td><td><b>${g(x.b+x.p+x.x)}</b></td>${mbn?`<td>${x.m?'+'+fmt(x.m):'–'}</td>`:''}</tr>`}).join('')}</tbody></table>
+  <table class="sum"><tbody><tr><td>Basis (Rucksack ohne Verbrauch)</td><td>${fmt(bs)}</td></tr><tr><td>+ Verbrauch</td><td>${fmt(vb)}</td></tr><tr><td>+ Wasser</td><td>${fmt(wa)}</td></tr><tr><td>+ Essen</td><td>${fmt(fd)}</td></tr><tr class="t"><td>= Rucksack</td><td>${fmt(rs)}</td></tr><tr><td>Am Körper</td><td>${fmt(bd)}</td></tr><tr class="t"><td>Gesamt (Rucksack + Körper)</td><td>${fmt(rs+bd)}</td></tr>${mbn?`<tr><td>Vielleicht, nicht eingerechnet (${mbn} Teil${mbn>1?'e':''})</td><td>+ ${fmt(mbw)}</td></tr><tr class="t"><td>Rucksack mit allen Vielleicht-Teilen</td><td>${fmt(rs+mr)}</td></tr>`:''}</tbody></table></section>`}
  $('#pr').innerHTML=r}
 }
 
