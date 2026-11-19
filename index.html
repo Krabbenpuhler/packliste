@@ -200,7 +200,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
  #pr h4{font-size:8pt;margin:2px 0 0 6px;color:#555;font-style:italic}
  #pr li{display:flex;gap:6px;align-items:center;padding:1.5px 0;break-inside:avoid}
  #pr .bx{width:3.2mm;height:3.2mm;border:1px solid #000;flex:none}
- #pr .g{margin-left:auto;color:#333;white-space:nowrap}
+ #pr .g{margin-left:auto;color:#333;white-space:nowrap}.je{color:#888;font-size:.85em}
  #pr i{font-size:8pt;color:#333}
  #pr .wo{column-span:all;break-inside:avoid;margin-top:10px}
  #pr table{border-collapse:collapse;width:100%;font-size:9pt;margin:4px 0 8px;font-variant-numeric:tabular-nums}
@@ -268,7 +268,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.32';
+const K='packliste.v1';const VER='v0.33';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -366,7 +366,7 @@ function render(){
   const ci=grp(items.filter(i=>i.c==c&&t.sel[i.id]));if(!ci.length)continue;
   r+=`<section><h2>${esc(c)}</h2><ul>`;let s=null;
   let ar=null;for(const i of ci){if(i.s!==s||(i.a||'')!==ar){if(i.s!==s){s=i.s;if(s)r+=`</ul><h3>${esc(s)}</h3><ul>`}ar=i.a||'';if(ar)r+=`</ul><h4>${esc(ar)}</h4><ul>`}
-   r+=`<li><span class="bx"></span><span>${N(t,i)>1?N(t,i)+'× ':''}${esc(i.n)}${P(t,i)=='b'?' <i>(am Körper)</i>':''}${MB(t,i)?' <i>(vielleicht)</i>':''}</span><span class="g">${W(t,i)*N(t,i)} g${F(t,i)&&!t.em[i.id]?' + '+F(t,i)*N(t,i):''}</span></li>`}
+   r+=`<li><span class="bx"></span><span>${N(t,i)>1?N(t,i)+'× ':''}${esc(i.n)}${P(t,i)=='b'?' <i>(am Körper)</i>':''}${MB(t,i)?' <i>(vielleicht)</i>':''}</span><span class="g">${N(t,i)>1?`<small class="je">je ${W(t,i)} g${F(t,i)&&!t.em[i.id]?' + '+F(t,i):''} · </small>`:''}${W(t,i)*N(t,i)} g${F(t,i)&&!t.em[i.id]?' + '+F(t,i)*N(t,i):''}</span></li>`}
   r+='</ul></section>'}
  {const cats=[...new Set(items.filter(i=>t.sel[i.id]).map(i=>i.c))],cg=c=>{let b=0,p=0,x=0,m=0;for(const i of items)if(i.c==c&&t.sel[i.id]){const k=N(t,i),w=W(t,i)*k,f=(t.em[i.id]?0:F(t,i))*k;if(MB(t,i)){m+=w+f;continue}if(P(t,i)=='b')b+=w+f;else{p+=w;x+=f}}return{b,p,x,m}};
   let mr=0;for(const i of items)if(t.sel[i.id]&&MB(t,i)&&P(t,i)!='b')mr+=X(t,i)*N(t,i);
