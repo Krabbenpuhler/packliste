@@ -268,7 +268,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.31';
+const K='packliste.v1';const VER='v0.32';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -466,7 +466,10 @@ $('#exp').onclick=async()=>{const s=JSON.stringify(S);let d=null;try{d=await win
  if(d){try{await d.save({filename:'packliste-sicherung_'+VER+'.json',data:s})}catch(_){}return}
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'application/json'}));a.download='packliste-sicherung_'+VER+'.json';a.click()};
 $('#imp').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(async x=>{try{const d=JSON.parse(x);if(d&&d.packliste_neu){let n=0,sk=0;for(const x of d.add||[]){if(S.items.some(i=>i.id==x.id)){sk++;continue}const it={c:'Sonstiges',s:'',a:'',h:'',m:'',z:'',g:0,b:0,f:0,t:'v',q:1,...x,nf:1};it.n=nmk(it);S.items.push(it);n++}
- const msg=[n+' Gegenstand/Gegenstände zur Ausrüstung hinzugefügt'+(sk?', '+sk+' waren schon vorhanden':'')+'.'];
+ const msg=(d.add||[]).length?[n+' Gegenstand/Gegenstände zur Ausrüstung hinzugefügt'+(sk?', '+sk+' waren schon vorhanden':'')+'.']:[];
+ const fbn=nm=>S.foods.find(x=>x.n.toLowerCase()==String(nm).trim().toLowerCase());
+ for(const fd of d.foods||[]){let f=fbn(fd.n);if(f){const a=[];if(fd.k!=null&&fd.k!=f.k){a.push('kcal '+nfi(f.k)+' → '+nfi(fd.k));f.k=fd.k}if(fd.u&&fd.u!=f.u){f.u=fd.u;a.push('Einheit '+(fd.u=='p'?'Stück':'g'))}if(fd.w!=null&&fd.w!=f.w){f.w=fd.w}if(a.length)msg.push('Lebensmittel „'+f.n+'“ angepasst: '+a.join(', ')+'.')}else{S.foods.push({id:uid(),n:fd.n,u:fd.u||'g',k:fd.k||0,w:fd.w||0});msg.push('Lebensmittel „'+fd.n+'“ angelegt.')}}
+ for(const md of d.meals||[]){if(S.meals.some(x=>x.n.toLowerCase()==md.n.toLowerCase())){msg.push('Vorlage „'+md.n+'“ gab es schon – nicht geändert.');continue}const m={id:uid(),n:md.n,items:[]};for(const e of md.items||[]){let f=fbn(e.f);if(!f){f={id:uid(),n:e.f,u:'g',k:0,w:0};S.foods.push(f)}m.items.push({id:uid(),f:f.id,q:e.q})}S.meals.push(m);msg.push('Vorlage „'+md.n+'“ angelegt ('+m.items.length+' Zutaten).')}
  for(const tr of d.tours||[]){const re=new RegExp(tr.match,'i'),TT=S.tours.filter(x=>re.test(x.name));if(!TT.length){msg.push('Keine Tour gefunden zu „'+tr.match+'“.');continue}
   for(const tt of TT){const ch=[];const vs=tt.vr&&tt.vr.length>1?' (aktuelle Variante)':'';
    for(const id of tr.sel||[]){const i=all(tt).find(x=>x.id==id);if(!i)continue;if(!tt.sel[id]){tt.sel[id]=1;ch.push(dn(i)+' ausgewählt')}}
