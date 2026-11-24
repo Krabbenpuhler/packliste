@@ -156,6 +156,13 @@ dialog .ck input{width:auto;display:inline;margin:0 8px 0 0}
 .xs div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
 .xs b{display:block;font:700 1.1rem Georgia,serif;font-variant-numeric:tabular-nums}
 .xs span{font-size:.8rem;color:var(--mut)}
+.stars{display:flex;align-items:center;gap:2px;padding:10px 12px 0}.stars button{font-size:1.7rem;line-height:1;border:0;background:none;color:var(--line);padding:0 .1em}.stars button.on{color:#eda100}.stars span{margin-left:8px;font-size:.85rem;color:var(--mut)}
+.rvr{flex-wrap:wrap;gap:6px 10px}.rvt{flex:1 1 220px;min-width:0}.rvr input{flex:1 1 100%;font-size:.85rem;padding:.3em .5em}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}.seg button{border:0;border-radius:0;background:transparent;color:var(--mut);font-size:.82rem;padding:.35em .6em;white-space:nowrap}.seg button+button{border-left:1px solid var(--line)}
+.rvr.ub{border-left-color:#1baf7a}.rvr.un{border-left-color:#e34948}.rvr.ud{border-left-color:#eda100}
+.seg button.on[data-u=b]{background:#1baf7a;color:#fff}.seg button.on[data-u=n]{background:#e34948;color:#fff}.seg button.on[data-u=d]{background:#eda100;color:#1a1a1a}
+.rvb{color:#13875e}.rvn{color:#c93534}.rvd{color:#a87200}.rvh{color:#c93534!important}.rvh.d{color:#a87200!important}.rvh.o{color:var(--mut)!important}
+@media (prefers-color-scheme:dark){.rvb{color:#3fcf98}.rvn{color:#f07a79}.rvd{color:#e0b040}.rvh{color:#f07a79!important}.rvh.d{color:#e0b040!important}}
 .xw{overflow-x:auto}
 .xt{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.9rem}
 .xt th,.xt td{padding:6px 8px;text-align:right;border-top:1px solid var(--line);white-space:nowrap}
@@ -215,7 +222,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <header><div class="top"><h1>Packliste <small id="ver"></small></h1><div class="nv"><nav><button data-p="gear">Ausrüstung</button><button data-p="tour">Touren</button></nav><button id="sync" class="syn off" type="button">☁ Sync einrichten</button><button id="undo" title="Letzte Änderung rückgängig machen" disabled>Zurück</button></div></div>
 <div class="tr" id="trbar"><select id="tour" aria-label="Tour"></select>
 <button id="new">Neue Tour</button><button id="dup">Kopieren</button><button id="ren">Umbenennen</button><button id="del">Löschen</button></div></header>
-<div class="sub" id="sub"><button data-v="plan">Planung</button><button data-v="pack">Packliste</button><button data-v="food">Essensplanung</button><button data-v="exp">Ausgaben</button></div>
+<div class="sub" id="sub"><button data-v="plan">Planung</button><button data-v="pack">Packliste</button><button data-v="food">Essensplanung</button><button data-v="exp">Ausgaben</button><button data-v="rv">Rückblick</button></div>
 <div class="bar" id="bar"><input id="q" type="search" placeholder="Suchen" aria-label="Suchen">
 <select id="so" aria-label="Sortierung"><option value="cat">Nach Kategorie</option><option value="name">Nach Name</option><option value="gd">Schwerste zuerst</option><option value="ga">Leichteste zuerst</option></select>
 <label><input type="checkbox" id="on">Nur ausgewählte</label>
@@ -268,7 +275,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.34';
+const K='packliste.v1';const VER='v0.35';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -343,10 +350,10 @@ function render(){
  $('#trbar').hidden=G;$('#tot').hidden=G;$('#addc').hidden=!G;{const lc=S.items.filter(i=>!i.nf).length;$('#asst').hidden=!G||!lc;$('#asst').textContent='Bezeichnungen aufteilen ('+lc+')'}$('#lgd').hidden=G;$('#on').parentElement.hidden=G;$('#prt').hidden=G;$('#wex').hidden=G;
  document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-current',b.dataset.p==page?'page':'false'));
  $('#tour').innerHTML=S.tours.map(x=>`<option value="${x.id}"${x.id==t.id?' selected':''}>${esc(x.name)}</option>`).join('');
- if(E){$('#tot').hidden=true;$('#list').innerHTML=view=='food'?foodHtml(t):view=='plan'?planHtml(t):expHtml(t);return}
+ if(E){$('#tot').hidden=true;$('#list').innerHTML=view=='food'?foodHtml(t):view=='plan'?planHtml(t):view=='rv'?rvHtml(t):expHtml(t);return}
  const list=items.filter(i=>(G||!only||t.sel[i.id])&&(!q||(i.n+i.c+i.s).toLowerCase().includes(q)));
  const cmp={cat:null,name:(a,b)=>a.n.localeCompare(b.n,'de'),gd:(a,b)=>X(t,b)-X(t,a),ga:(a,b)=>X(t,a)-X(t,b)}[sort];
- const row=i=>{const on=G||t.sel[i.id];return `<li class="row${on?' on':''}${on&&!G?(P(t,i)=='b'?' pb':' pp'):''}${on&&!G&&MB(t,i)?' mby':''}" data-id="${i.id}"><label${G?' data-a="edit"':''}>${G?'':`<input type="checkbox" data-a="sel"${on?' checked':''}>`}<span>${esc(cmp?i.n:dn(i))}${G&&i.pr?`<small>Kaufpreis ${nf(i.pr)} €${(i.q||1)>1?' je Stück':''}</small>`:''}${G&&(i.q||1)>1?`<em class="tag">× ${i.q}</em>`:''}${i.x?'<em class="tag">nur Tour</em>':''}${i.k?`<small>${esc(i.k)}</small>`:''}${F(t,i)?(on&&!G?`<small><button class="fl${i.id in t.of?' mod':''}" data-a="fl">${t.em[i.id]?'leer':'voll'}: + ${F(t,i)} g ${i.t=='w'?'Wasser':'Verbrauch'}</button></small>`:`<small>+ ${F(t,i)} g bei voll</small>`):''}</span></label>${on&&!G&&(i.q||1)>1?`<span class="qt"><button data-a="qm" aria-label="weniger">−</button><b>${N(t,i)}</b><button data-a="qp" aria-label="mehr">+</button></span>`:''}${on&&!G?`<button class="pl mbb${MB(t,i)?' on':''}" data-a="mb" title="Als „vielleicht“ markieren (je nach Wetter); wird nicht ins Gewicht eingerechnet" aria-pressed="${MB(t,i)}">${MB(t,i)?'vielleicht':'?'}</button>`:''}${on&&!G?`<button class="pl ${P(t,i)}" data-a="pl" title="Wechseln zwischen am Körper und im Rucksack">${P(t,i)=='b'?'am Körper':'Rucksack'}</button>`:''}<button class="w${i.id in t.ov?' mod':''}" data-a="edit" title="Bearbeiten">${W(t,i)*N(t,i)} g${N(t,i)>1&&on&&!G?`<small>je ${W(t,i)} g</small>`:''}</button></li>`};
+ const row=i=>{const on=G||t.sel[i.id];return `<li class="row${on?' on':''}${on&&!G?(P(t,i)=='b'?' pb':' pp'):''}${on&&!G&&MB(t,i)?' mby':''}" data-id="${i.id}"><label${G?' data-a="edit"':''}>${G?'':`<input type="checkbox" data-a="sel"${on?' checked':''}>`}<span>${esc(cmp?i.n:dn(i))}${G&&i.pr?`<small>Kaufpreis ${nf(i.pr)} €${(i.q||1)>1?' je Stück':''}</small>`:''}${G&&(i.q||1)>1?`<em class="tag">× ${i.q}</em>`:''}${i.x?'<em class="tag">nur Tour</em>':''}${i.k?`<small>${esc(i.k)}</small>`:''}${!G?rvHint(t,i):''}${F(t,i)?(on&&!G?`<small><button class="fl${i.id in t.of?' mod':''}" data-a="fl">${t.em[i.id]?'leer':'voll'}: + ${F(t,i)} g ${i.t=='w'?'Wasser':'Verbrauch'}</button></small>`:`<small>+ ${F(t,i)} g bei voll</small>`):''}</span></label>${on&&!G&&(i.q||1)>1?`<span class="qt"><button data-a="qm" aria-label="weniger">−</button><b>${N(t,i)}</b><button data-a="qp" aria-label="mehr">+</button></span>`:''}${on&&!G?`<button class="pl mbb${MB(t,i)?' on':''}" data-a="mb" title="Als „vielleicht“ markieren (je nach Wetter); wird nicht ins Gewicht eingerechnet" aria-pressed="${MB(t,i)}">${MB(t,i)?'vielleicht':'?'}</button>`:''}${on&&!G?`<button class="pl ${P(t,i)}" data-a="pl" title="Wechseln zwischen am Körper und im Rucksack">${P(t,i)=='b'?'am Körper':'Rucksack'}</button>`:''}<button class="w${i.id in t.ov?' mod':''}" data-a="edit" title="Bearbeiten">${W(t,i)*N(t,i)} g${N(t,i)>1&&on&&!G?`<small>je ${W(t,i)} g</small>`:''}</button></li>`};
  let h=G?'':vbarHtml(t);
  for(const c of [...new Set(items.map(i=>i.c).concat(G?S.cats.map(x=>x.c):[]))]){
   let ci=list.filter(i=>i.c==c);if(!ci.length&&!(G&&!q))continue;
@@ -439,6 +446,10 @@ $('#list').onclick=e=>{
  else if(a=='fx')return fexp();
  else if(a=='cu')return xcur();
  else if(a=='edit')return dlg(id);
+ else if(a=='rvs'){const rv=rvOf(t),n=+el.dataset.n;rv.st=rv.st==n?0:n}
+ else if(a=='rvu'){const o=rvOf(t).it,x=o[id]=o[id]||{},u=el.dataset.u;if(x.u==u)delete x.u;else x.u=u;if(!x.u&&!x.no)delete o[id]}
+ else if(a=='rvall'){const o=rvOf(t).it;for(const i of all(t))if(t.sel[i.id]&&!(o[i.id]||{}).u){o[i.id]=o[i.id]||{};o[i.id].u='b'}}
+ else if(a=='rvf'){rvOnly=!rvOnly}
  else if(a=='vs')vSwitch(t,el.dataset.vid);
  else if(a=='vn')return vNew(t);
  else if(a=='vr')return vRen(t);
@@ -630,6 +641,8 @@ $('#list').onchange=e=>{const el=e.target,t=T(),v=el.type=='checkbox'?(el.checke
  if(el.dataset.p){const[a,b]=el.dataset.p.split('.');b?S.prof[a][b]=v:S.prof[a]=v}
  else if(el.dataset.r)t.fp[el.dataset.r]=v;
  else if(el.dataset.pn){const sec=el.dataset.pn,k=el.dataset.k;if(sec=='notes')t.pn.notes=v;else if(el.dataset.rid){const r=plist(t,sec).find(x=>x.id==el.dataset.rid);if(r)r[k]=v}else if(isDay(sec)){const dy=pday(t,sec);if(dy)dy[k]=v}else t.pn[sec][k]=v}
+ else if(el.dataset.rv)rvOf(t)[el.dataset.rv]=v;
+ else if(el.dataset.rvn){const o=rvOf(t).it,k=el.dataset.rvn,x=o[k]=o[k]||{};if(v)x.no=v;else delete x.no;if(!x.u&&!x.no)delete o[k]}
  else if(el.dataset.did){const d=t.fp.days.find(x=>x.id==el.dataset.did);if(d){const[a,b]=el.dataset.k.split('.');b?d[a][b]=v:d[a]=v;if(a=='nach'){const nx=t.fp.days[t.fp.days.indexOf(d)+1];if(nx&&!nx.von){nx.von=v;save();return render()}}}}
  else return;
  const quiet=el.tagName=='TEXTAREA'||(el.tagName=='INPUT'&&!['number','checkbox'].includes(el.type));
@@ -688,6 +701,25 @@ $('#gpxin').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f||!gpx
   const t=T(),d=t.fp.days.find(v=>v.id==gpxDay);if(!d)return;
   d.km=r.km;d.hm=r.hm;d.ist={f:f.name.replace(/\.gpx$/i,''),km:r.km,hm:r.hm,mov:r.mov,d:r.d,t0:r.t0,t1:r.t1};
   if(!d.ds&&r.name)d.ds=r.name;save();render()})};
+// ===== Rückblick =====
+const RVU={b:['✓','Benutzt','benutzt'],n:['✗','Nicht benutzt','nicht benutzt'],d:['⛑','Dabeilassen','nicht benutzt, aber dabeilassen']};
+let rvOnly=false;
+const rvOf=t=>{t.rv=t.rv||{};t.rv.it=t.rv.it||{};return t.rv};
+const tStart=t=>(t.fp&&(t.fp.from||(t.fp.days[0]||{}).d))||'';
+function rvHint(t,i){let best=null;for(const o of S.tours){if(o===t||!o.rv||!o.rv.it)continue;const x=o.rv.it[i.id];if(!x||!(x.u=='n'||x.u=='d'||x.no))continue;if(!best||tStart(o)>tStart(best.o))best={o,x}}
+ if(!best)return'';const x=best.x;return`<small class="rvh${x.u=='d'?' d':x.u=='n'?'':' o'}">${x.u=='n'?'✗ nicht benutzt':x.u=='d'?'⛑ nicht benutzt, Notfall':'Notiz'} bei „${esc(best.o.name)}“${x.no?': '+esc(x.no):''}</small>`}
+function rvHtml(t){const rv=rvOf(t),L=all(t).filter(i=>t.sel[i.id]),ag={b:[0,0],n:[0,0],d:[0,0],o:[0,0]};
+ for(const i of L){const u=(rv.it[i.id]||{}).u||'o',k=N(t,i);ag[u][0]+=k;ag[u][1]+=W(t,i)*k}
+ const tf=(k,l,p)=>`<label class="wide">${l}<textarea data-rv="${k}" placeholder="${p}" style="min-height:4.5em">${esc(rv[k]||'')}</textarea></label>`;
+ let h=`<section class="cat"><h2>Gesamteindruck</h2><div class="stars" role="group" aria-label="Bewertung der Tour">${[1,2,3,4,5].map(n=>`<button data-a="rvs" data-n="${n}" class="${n<=(rv.st||0)?'on':''}" aria-label="${n} von 5 Sternen" aria-pressed="${n==rv.st}">★</button>`).join('')}<span>${rv.st?rv.st+' von 5':'noch nicht bewertet'}</span></div>
+ <div class="fg">${tf('gut','Was lief gut?','z. B. Schlafsystem war perfekt')}${tf('anders','Was würde ich anders machen?','z. B. früher starten, weniger Essen tragen')}${tf('weg','Nächstes Mal weglassen','z. B. zweites T-Shirt')}${tf('neu','Nächstes Mal mitnehmen / Alternativen','z. B. leichteres Ladegerät')}</div></section>`;
+ const kg=([n,g])=>`${n} Teil${n==1?'':'e'} · ${fmt(g)}`;
+ h+=`<div class="xs"><div><b class="rvb">✓ ${fmt(ag.b[1])}</b><span>benutzt, ${ag.b[0]} Teil${ag.b[0]==1?'':'e'}</span></div><div><b class="rvn">✗ ${fmt(ag.n[1])}</b><span>nicht benutzt – Sparpotenzial, ${ag.n[0]} Teil${ag.n[0]==1?'':'e'}</span></div><div><b class="rvd">⛑ ${fmt(ag.d[1])}</b><span>nicht benutzt, aber dabeilassen, ${ag.d[0]} Teil${ag.d[0]==1?'':'e'}</span></div><div><b>${ag.o[0]}</b><span>noch offen (${fmt(ag.o[1])})</span></div></div>`;
+ h+=`<section class="cat"><h2>Ausrüstung${vName(t)}<small><button class="mini" data-a="rvf" aria-pressed="${rvOnly}">${rvOnly?'Alle zeigen':'Nur offene'}</button>${ag.o[0]?`<button class="mini" data-a="rvall">Rest als benutzt</button>`:''}</small></h2><p class="hint" style="padding-top:8px">Markiere nach der Tour jedes Teil. Was nicht benutzt wurde, zeigt die Packliste bei der nächsten Tour als Hinweis – zusammen mit deiner Notiz.</p>`;
+ if(!L.length)h+='<p class="hint">In dieser Tour ist noch nichts ausgewählt.</p>';
+ for(const c of [...new Set(L.map(i=>i.c))]){const ci=grp(L.filter(i=>i.c==c&&(!rvOnly||!(rv.it[i.id]||{}).u)));if(!ci.length)continue;
+  h+=`<h3 class="sl" style="padding:8px 12px 2px;margin:0">${esc(c)}</h3><ul>`+ci.map(i=>{const x=rv.it[i.id]||{};return`<li class="row rvr${x.u?' u'+x.u:''}" data-id="${i.id}"><span class="rvt">${N(t,i)>1?N(t,i)+'× ':''}${esc(i.n)}<small>${i.s?esc(i.s)+' · ':''}${fmt(W(t,i)*N(t,i))}${MB(t,i)?' · war „vielleicht“':''}</small></span><span class="seg" role="group" aria-label="Nutzung">${['b','n','d'].map(u=>`<button data-a="rvu" data-u="${u}" class="${x.u==u?'on':''}" aria-pressed="${x.u==u}" title="${RVU[u][2]}">${RVU[u][0]} ${RVU[u][1]}</button>`).join('')}</span><input type="text" data-rvn="${i.id}" value="${esc(x.no||'')}" placeholder="Notiz oder Alternative fürs nächste Mal" aria-label="Notiz zu ${esc(i.n)}"></li>`}).join('')+'</ul>'}
+ return h+'</section>'}
 // ===== Varianten =====
 const VF=['sel','pl','qt','ov','of','em','mb','food'];
 const cl=x=>JSON.parse(JSON.stringify(x??null));
