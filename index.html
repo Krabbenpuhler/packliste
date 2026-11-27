@@ -321,7 +321,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.38';
+const K='packliste.v1';const VER='v0.39';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -394,7 +394,7 @@ const uid=()=>'x'+Math.random().toString(36).slice(2,9);
 const ask=(m,def)=>new Promise(r=>{const d=$('#md'),i=$('#mi');$('#mt').textContent=m;i.hidden=def===undefined;i.value=def||'';d.returnValue='';d.onclose=()=>r(d.returnValue=='ok'?(def===undefined?true:i.value.trim()):null);d.showModal();if(def!==undefined)i.focus()});
 let q='',sort='cat',only=false,closed=new Set(),ed=null,page=S.page||'gear',view=S.view||'pack';
 
-function render(){const y=scrollY,ae=document.activeElement;let fk=null;if(isF(ae)){const li=ae.closest('li[data-id]');const at=[...ae.attributes].filter(a=>a.name.startsWith('data-')).map(a=>`[${a.name}="${CSS.escape(a.value)}"]`).join('');if(at)fk=(li?`li[data-id="${CSS.escape(li.dataset.id)}"] `:'')+ae.tagName.toLowerCase()+at}
+function render(){const y=scrollY,ae=document.activeElement;let fk=null;if(isF(ae)&&ae.tagName!='SELECT'&&!['checkbox','radio','date'].includes(ae.type)){const li=ae.closest('li[data-id]');const at=[...ae.attributes].filter(a=>a.name.startsWith('data-')).map(a=>`[${a.name}="${CSS.escape(a.value)}"]`).join('');if(at)fk=(li?`li[data-id="${CSS.escape(li.dataset.id)}"] `:'')+ae.tagName.toLowerCase()+at}
  pend=false;render0();planFold();if(fk){const n=$('#list').querySelector(fk);if(n&&n!==ae)try{n.focus({preventScroll:true})}catch(e){}}if(Math.abs(scrollY-y)>1)scrollTo(0,y)}
 function render0(){
  const t=cur(),G=page=='gear',items=all(t),E=!G&&view!='pack';
@@ -713,6 +713,7 @@ $('#list').onchange=e=>{const el=e.target,t=T(),v=el.type=='checkbox'?(el.checke
  else if(el.dataset.did){const d=t.fp.days.find(x=>x.id==el.dataset.did);if(d){const[a,b]=el.dataset.k.split('.');b?d[a][b]=v:d[a]=v;if(a=='nach'){const nx=t.fp.days[t.fp.days.indexOf(d)+1];if(nx&&!nx.von){nx.von=v;save();return render()}}}}
  else return;
  const quiet=el.tagName=='TEXTAREA'||(el.tagName=='INPUT'&&!['number','checkbox'].includes(el.type));
+ if(el.tagName=='SELECT'||el.type=='checkbox')el.blur();
  save();if(!quiet){if(el.type=='number')setTimeout(softRender,0);else render()}};
 document.querySelectorAll('#sub button').forEach(b=>b.onclick=()=>{view=b.dataset.v;S.view=view;save();render()});
 const WCN=8,WEX={v:'Verbrauch',w:'Wasser',e:'Essen',b:'Am Körper'};
