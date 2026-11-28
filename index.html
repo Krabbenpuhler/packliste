@@ -179,6 +179,8 @@ dialog .ck input{width:auto;display:inline;margin:0 8px 0 0}
 .xt tfoot td{font-weight:700;border-top:2px solid var(--ink)}
 .xt tr.tdy td{background:rgba(242,183,5,.14)}
 .xt td small{display:block;font-size:.75rem;color:var(--mut);white-space:normal}
+.xt td.xa{cursor:pointer}.xt td.xa:hover{background:rgba(242,183,5,.18)}.xt .sh{display:none}
+@media (max-width:700px){.xt{table-layout:fixed;font-size:.8rem}.xt .lg{display:none}.xt .sh{display:inline}.xt th,.xt td{padding:6px 3px}.xt th:first-child,.xt td:first-child{width:34%;white-space:normal}.xt .xp{display:none}.xt td small{font-size:.7rem}.xt tfoot td{font-size:.78rem}}
 .xk{display:flex;justify-content:space-between;gap:8px;margin-bottom:12px}
 .xk>div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;flex:1;max-width:48%}
 .xk .r{text-align:right}
@@ -321,7 +323,7 @@ dialog input,dialog select{width:100%;display:block;margin-top:2px}
 <div id="acts"></div></dialog>
 <script>
 const D={items:[],sel:[],patch:[],seed:[]};
-const K='packliste.v1';const VER='v0.40';
+const K='packliste.v1';const VER='v0.41';
 let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!S||!S.items)S={items:D.items,cur:'t1',tours:[{id:'t1',name:'Neue Tour',sel:Object.fromEntries(D.sel.map(i=>[i,1])),ov:{},pl:{},ex:[]}]};
 function migrate(){
@@ -491,7 +493,7 @@ $('#list').onclick=e=>{
  else if(a=='ai')return dlg(null,el.dataset.c);
  else if(a=='ae')return xdlg();
  else if(a=='ee')return xdlg(id);
- else if(a=='aed')return xdlg(null,el.dataset.d);
+ else if(a=='aed')return xdlg(null,el.dataset.d,el.dataset.c);
  else if(a=='xe')return xexp();
  else if(a=='fr')return frange();
  else if(a=='ff'){const x=el.dataset.did;fcl.has(x)?fcl.delete(x):fcl.add(x)}
@@ -562,7 +564,8 @@ $('#tot').onclick=async e=>{if(!e.target.closest('[data-a=food]'))return wopen()
 async function ren(k,c,s){const o=k=='c'?c:s,n=await ask(k=='c'?'Neuer Name der Kategorie?':'Neuer Name der Unterkategorie?',o);if(!n||n==o)return;
  const f=i=>{if(k=='c'){if(i.c==c)i.c=n}else if(i.c==c&&i.s==s)i.s=n};
  S.items.forEach(f);S.tours.forEach(t=>t.ex.forEach(f));S.cats.forEach(f);save();render()}
-const CATS=['Essen','Übernachten','Mobilität','Sonstiges'];
+const CATS=['Essen','Übernachten','Mobilität','Sonstiges'],XS={Essen:'Essen','Übernachten':'Übern.','Mobilität':'Mobil.',Sonstiges:'Sonst.'};
+const fds=d=>new Date(d+'T00:00:00').toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit'});
 const nf=v=>v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fd=d=>new Date(d+'T00:00:00').toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
 function agg(t){const ax=t.ax.slice().sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0),days={},tot=Object.fromEntries(CATS.map(c=>[c,0]));let sum=0;
@@ -586,20 +589,20 @@ function expHtml(t){const{ax,days,tot,sum}=agg(t),m=v=>nf(v)+' '+esc(t.cur),ds=d
   pie+=`<circle cx="100" cy="100" r="50" fill="var(--card)"/>`;
   h+=`<div class="xk"><div><b>${m(sum)}</b><span>Gesamt</span></div><div class="r"><b>${m(nd?sum/nd:0)}</b><span>Ø pro Tag (${nd} Tage)</span></div></div>`;
   h+=`<section class="cat xcat"><div class="xcl">${CATS.map((c,i)=>`<div class="xci"><span class="sw" style="background:${XC[i]}"></span><span class="n">${c}</span><b>${m(tot[c])}</b><span class="p">${sum?Math.round(tot[c]/sum*100):0} %</span></div>`).join('')}</div><svg class="xpie" viewBox="0 0 200 200" role="img" aria-label="Ausgaben nach Kategorie">${pie}</svg></section>`}
- h+=`<section class="cat"><h2>Pro Tag<small>in ${esc(t.cur)}</small></h2><div class="xw"><table class="xt"><thead><tr><th>Tag</th>${CATS.map(c=>`<th>${c}</th>`).join('')}<th>Summe</th><th></th></tr></thead><tbody>${rows.map(r=>`<tr${r.d==today?' class="tdy"':''}><td>${esc(r.l)}<small>${fd(r.d)}${r.d==today?' · heute':''}${r.s?' · '+esc(r.s):''}</small></td>${CATS.map(c=>`<td>${(days[r.d]||{})[c]?nf(days[r.d][c]):'–'}</td>`).join('')}<td><b>${days[r.d]?nf(ds(r.d)):'–'}</b></td><td><button class="mini" data-a="aed" data-d="${r.d}" title="Ausgabe für diesen Tag" aria-label="Ausgabe für ${esc(r.l)} hinzufügen">+</button></td></tr>`).join('')}</tbody><tfoot><tr><td>Gesamt</td>${CATS.map(c=>`<td>${nf(tot[c])}</td>`).join('')}<td>${nf(sum)}</td><td></td></tr></tfoot></table></div></section>`;
+ h+=`<section class="cat"><h2>Pro Tag<small>in ${esc(t.cur)}</small></h2><div class="xw"><table class="xt"><thead><tr><th>Tag</th>${CATS.map(c=>`<th><span class="lg">${c}</span><span class="sh">${XS[c]}</span></th>`).join('')}<th><span class="lg">Summe</span><span class="sh">Σ</span></th><th class="xp"></th></tr></thead><tbody>${rows.map(r=>`<tr${r.d==today?' class="tdy"':''}><td class="xa" data-a="aed" data-d="${r.d}">${esc(r.l)}<small><span class="lg">${fd(r.d)}</span><span class="sh">${fds(r.d)}</span>${r.d==today?' · heute':''}${r.s?' · '+esc(r.s):''}</small></td>${CATS.map(c=>`<td class="xa" data-a="aed" data-d="${r.d}" data-c="${c}" title="${c} am ${fd(r.d)} eintragen">${(days[r.d]||{})[c]?nf(days[r.d][c]):'–'}</td>`).join('')}<td><b>${days[r.d]?nf(ds(r.d)):'–'}</b></td><td class="xp"><button class="mini" data-a="aed" data-d="${r.d}" title="Ausgabe für diesen Tag" aria-label="Ausgabe für ${esc(r.l)} hinzufügen">+</button></td></tr>`).join('')}</tbody><tfoot><tr><td>Gesamt</td>${CATS.map(c=>`<td>${nf(tot[c])}</td>`).join('')}<td>${nf(sum)}</td><td class="xp"></td></tr></tfoot></table></div></section>`;
  if(ax.length)h+=`<section class="cat"><h2>Einzelbuchungen</h2><ul>${ax.map(e=>`<li class="row" data-id="${e.id}"><button class="xr" data-a="ee">${esc(e.n||e.c)}<small>${esc(dlab(t,e.d))}, ${e.c}</small></button><b>${m(e.a)}</b></li>`).join('')}</ul></section>`;
  return h}
 let xe=null;
 function xsync(){const v=$('#xds').value;$('#xdl').hidden=v!='other';if(v!='other')$('#xdt').value=v=='today'?tday():v}
 $('#xds').onchange=xsync;
-function xdlg(id,pre){const t=T();xe=id?t.ax.find(e=>e.id==id):null;
+function xdlg(id,pre,pc){const t=T();xe=id?t.ax.find(e=>e.id==id):null;
  const td=new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10);
  $('#xt').textContent=xe?'Ausgabe bearbeiten':'Neue Ausgabe';
  $('#xc').innerHTML=CATS.map(c=>`<option>${c}</option>`).join('');
  const TD=tdays(t),today=tday(),inT=TD.some(x=>x.d==today),dflt=xe?xe.d:pre||(inT?today:(t.ax.length?t.ax[t.ax.length-1].d:(TD[0]||{}).d||today));
  $('#xds').innerHTML=(inT?'':`<option value="today">Heute, ${fd(today)}</option>`)+TD.map(x=>`<option value="${x.d}">${esc(x.l)}, ${fd(x.d)}${x.d==today?' (heute)':''}${x.s?' · '+esc(x.s):''}</option>`).join('')+'<option value="other">Anderes Datum …</option>';
  $('#xds').value=TD.some(x=>x.d==dflt)?dflt:(dflt==today?'today':'other');$('#xdt').value=dflt;xsync();
- $('#xc').value=xe?xe.c:CATS[0];$('#xa').value=xe?xe.a:'';$('#xn').value=xe?xe.n:'';
+ $('#xc').value=xe?xe.c:(pc&&CATS.includes(pc)?pc:CATS[0]);$('#xa').value=xe?xe.a:'';$('#xn').value=xe?xe.n:'';
  $('#xb').innerHTML=[['s','Speichern'],...(xe?[['d','Löschen']]:[]),['x','Abbrechen']].map(([a,l])=>`<button type="button"${a=='x'?' class="ghost"':''} data-x="${a}">${l}</button>`).join('');
  $('#xd').showModal();$('#xa').focus()}
 $('#xb').onclick=async e=>{const a=e.target.dataset.x;if(!a)return;if(a=='x')return $('#xd').close();const t=T();
